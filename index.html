@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshGuard AI — Cold Chain Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface2: #f8f9fc;
+  --border: #e4e6ef;
+  --border-light: #eef0f8;
+  --purple: #6b4fbb;
+  --purple-light: #8b6fd4;
+  --purple-dim: #ede8f9;
+  --purple-glow: rgba(107,79,187,0.12);
+  --teal: #00b8a9;
+  --teal-dim: #e0f7f5;
+  --amber: #f59e0b;
+  --amber-dim: #fef3c7;
+  --red: #ef4444;
+  --red-dim: #fef2f2;
+  --green: #22c55e;
+  --green-dim: #f0fdf4;
+  --blue: #3b82f6;
+  --blue-dim: #eff6ff;
+  --text: #1a1d2e;
+  --text-2: #4b5068;
+  --text-3: #8b91a8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --sidebar-w: 64px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; }
+
+/* LAYOUT */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 4px;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  width: 36px; height: 36px;
+  background: var(--purple);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+.nav-item {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  font-size: 18px;
+  color: #6b7194;
+}
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background: var(--purple); color: #fff; }
+.nav-item .tooltip {
+  position: absolute;
+  left: 54px;
+  background: var(--text);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  font-family: var(--font);
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.nav-item:hover .tooltip { opacity: 1; }
+.sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.avatar {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--purple), var(--teal));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: #fff;
+}
+
+/* MAIN */
+.main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* TOPBAR */
+.topbar {
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.topbar-brand { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.topbar-brand span { color: var(--purple); }
+.topbar-breadcrumb { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+.topbar-breadcrumb .sep { opacity: 0.5; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--green-dim);
+  border: 1px solid #86efac;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #16a34a;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.topbar-time { font-family: var(--mono); font-size: 12px; color: var(--text-3); }
+.notif-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text-2);
+}
+.notif-badge {
+  position: absolute; top: 4px; right: 4px;
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+
+/* SCREEN TABS */
+.screen-tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  gap: 0;
+  flex-shrink: 0;
+}
+.tab {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+.tab-icon { font-size: 13px; }
+
+/* CONTENT */
+.content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+/* SCREENS */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .icon { font-size: 14px; }
+.card-body { padding: 16px 18px; }
+.card-action {
+  font-size: 11px;
+  color: var(--purple);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* GRID LAYOUTS */
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+.grid-map { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+.grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-12 { margin-bottom: 12px; }
+
+/* KPI CARDS */
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-card.purple::before { background: var(--purple); }
+.kpi-card.teal::before { background: var(--teal); }
+.kpi-card.amber::before { background: var(--amber); }
+.kpi-card.red::before { background: var(--red); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-label { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 6px; font-family: var(--mono); }
+.kpi-sub { font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 4px; }
+.kpi-icon {
+  position: absolute; right: 16px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 28px; opacity: 0.12;
+}
+.delta { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.delta.up { color: #16a34a; background: #dcfce7; }
+.delta.down { color: #dc2626; background: #fee2e2; }
+.delta.warn { color: #d97706; background: #fef3c7; }
+
+/* WORLD MAP */
+.world-map-container {
+  position: relative;
+  background: linear-gradient(160deg, #f0f4ff 0%, #e8edf8 100%);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  min-height: 280px;
+}
+.map-svg { width: 100%; display: block; }
+
+/* SHIPMENT LIST */
+.shipment-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  gap: 10px;
+}
+.shipment-item:last-child { border-bottom: none; }
+.ship-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ship-dot.normal { background: var(--green); }
+.ship-dot.warning { background: var(--amber); }
+.ship-dot.risk { background: var(--red); animation: blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.ship-info { flex: 1; }
+.ship-id { font-size: 12px; font-weight: 600; color: var(--text); font-family: var(--mono); }
+.ship-route { font-size: 11px; color: var(--text-3); }
+.ship-badge {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge-normal { background: var(--green-dim); color: #16a34a; }
+.badge-warning { background: var(--amber-dim); color: #d97706; }
+.badge-risk { background: var(--red-dim); color: #dc2626; }
+.badge-info { background: var(--blue-dim); color: #2563eb; }
+.badge-purple { background: var(--purple-dim); color: var(--purple); }
+
+/* ALERT ITEMS */
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+.alert-item:last-child { margin-bottom: 0; }
+.alert-item.critical { background: #fff5f5; border: 1px solid #fecaca; }
+.alert-item.warning { background: #fffbeb; border: 1px solid #fde68a; }
+.alert-item.info { background: #eff6ff; border: 1px solid #bfdbfe; }
+.alert-icon { font-size: 14px; margin-top: 1px; }
+.alert-text { font-size: 12px; }
+.alert-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.alert-desc { color: var(--text-3); line-height: 1.4; }
+.alert-time { font-size: 10px; color: var(--text-3); font-family: var(--mono); margin-left: auto; white-space: nowrap; }
+
+/* CHARTS */
+.chart-area { position: relative; }
+svg.chart { overflow: visible; }
+
+/* MINI SPARKLINE */
+.sparkline { display: inline-block; }
+
+/* PROGRESS BAR */
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s; }
+
+/* SCREEN 2: DIGITAL TWIN */
+.twin-container {
+  background: linear-gradient(135deg, #0f0c1a 0%, #1a1235 50%, #0c1a2e 100%);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+}
+.twin-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(107,79,187,0.2) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(0,184,169,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.twin-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: center; }
+.container-3d {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+}
+.env-sensor {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  gap: 12px;
+  backdrop-filter: blur(8px);
+}
+.env-sensor:last-child { margin-bottom: 0; }
+.sensor-icon { font-size: 18px; }
+.sensor-label { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.sensor-value { font-size: 20px; font-weight: 700; color: #fff; font-family: var(--mono); }
+.sensor-unit { font-size: 11px; color: rgba(255,255,255,0.4); }
+.sensor-bar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.sensor-bar-fill { height: 100%; border-radius: 2px; }
+.freshness-gauge {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+.freshness-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+.freshness-circle { position: relative; width: 100px; height: 100px; margin: 0 auto 12px; }
+.freshness-value { font-size: 28px; font-weight: 700; color: #fff; font-family: var(--mono); }
+.freshness-sub { font-size: 11px; color: rgba(255,255,255,0.4); }
+.shelf-countdown {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--teal);
+  text-align: center;
+  margin: 8px 0;
+}
+
+/* RIPENING TIMELINE */
+.ripening-bar {
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 8px;
+  position: relative;
+}
+.rip-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.9); transition: all 0.3s; }
+.rip-now {
+  position: absolute;
+  top: -6px;
+  width: 2px;
+  height: calc(100% + 12px);
+  background: #fff;
+  border-radius: 1px;
+}
+.rip-now::after {
+  content: 'NOW';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  font-family: var(--mono);
+}
+
+/* SCREEN 3: AI PREDICTION */
+.risk-score-big {
+  font-size: 56px;
+  font-weight: 700;
+  font-family: var(--mono);
+  line-height: 1;
+}
+.risk-score-big.low { color: var(--green); }
+.risk-score-big.medium { color: var(--amber); }
+.risk-score-big.high { color: var(--red); }
+.factor-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.factor-row:last-child { border-bottom: none; }
+.factor-name { font-size: 12px; color: var(--text-2); flex: 1; }
+.factor-impact { font-size: 11px; font-weight: 600; width: 36px; text-align: right; }
+.factor-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.factor-fill { height: 100%; border-radius: 3px; }
+.factor-fill.negative { background: var(--red); }
+.factor-fill.positive { background: var(--green); }
+.factor-fill.neutral { background: var(--amber); }
+
+/* SCREEN 4: LOGISTICS */
+.recommendation-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--surface);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.recommendation-card:hover { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-glow); }
+.recommendation-card.priority { border-left: 3px solid var(--red); }
+.recommendation-card.secondary { border-left: 3px solid var(--amber); }
+.recommendation-card.routine { border-left: 3px solid var(--teal); }
+.rec-icon-wrap {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.rec-icon-wrap.red { background: var(--red-dim); }
+.rec-icon-wrap.amber { background: var(--amber-dim); }
+.rec-icon-wrap.teal { background: var(--teal-dim); }
+.rec-icon-wrap.purple { background: var(--purple-dim); }
+.rec-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.rec-desc { font-size: 12px; color: var(--text-3); line-height: 1.4; }
+.rec-meta { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.rec-actions { margin-top: 12px; display: flex; gap: 8px; }
+.btn-primary {
+  padding: 7px 14px;
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--purple-light); }
+.btn-ghost {
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--purple); color: var(--purple); }
+
+/* SCREEN 5: DISTRIBUTION */
+.demand-map {
+  position: relative;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);
+  border-radius: var(--radius-sm);
+  min-height: 220px;
+  overflow: hidden;
+}
+.alloc-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  gap: 12px;
+}
+.alloc-row:last-child { border-bottom: none; }
+.alloc-rank {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--purple-dim);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.alloc-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.alloc-sub { font-size: 11px; color: var(--text-3); }
+.alloc-shelf { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.alloc-shelf.good { color: var(--green); }
+.alloc-shelf.warn { color: var(--amber); }
+.alloc-bar-wrap { flex: 1; }
+
+/* TIMELINE */
+.timeline-item {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 16px;
+  position: relative;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 28px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-dot {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+  z-index: 1;
+}
+.timeline-dot.green { background: var(--green-dim); }
+.timeline-dot.amber { background: var(--amber-dim); }
+.timeline-dot.red { background: var(--red-dim); }
+.timeline-dot.purple { background: var(--purple-dim); }
+.timeline-content { flex: 1; padding-top: 4px; }
+.timeline-title { font-size: 12px; font-weight: 600; color: var(--text); }
+.timeline-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.timeline-time { font-size: 10px; color: var(--text-3); font-family: var(--mono); }
+
+/* MISC */
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.inline-flex { display: flex; align-items: center; gap: 8px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.tag {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.scroll-content { max-height: 220px; overflow-y: auto; }
+.scroll-content::-webkit-scrollbar { width: 4px; }
+.scroll-content::-webkit-scrollbar-track { background: transparent; }
+.scroll-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ANIMATED ENTRANCE */
+.card, .kpi-card { animation: fadeUp 0.3s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ============================
+   SCREEN 1: WORLD MAP SVG
+   ============================ */
+.map-pin {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.map-pin circle { transition: r 0.2s; }
+.map-pin:hover circle { r: 7; }
+.ping-ring { animation: ping 2s infinite; }
+@keyframes ping { 0%{opacity:0.8;r:6;} 100%{opacity:0;r:16;} }
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(2,1fr); }
+  .grid-map { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🌿</div>
+  <div class="nav-item active" onclick="showScreen(0)" data-screen="0">
+    🌍
+    <div class="tooltip">Global Control</div>
+  </div>
+  <div class="nav-item" onclick="showScreen(1)" data-screen="1">
+    📦
+    <div class="tooltip">Digital Twin</div>
+  </div>
+  <div class="nav-item" onclick="showScreen(2)" data-screen="2">
+    🤖
+    <div class="tooltip">AI Prediction</div>
+  </div>
+  <div class="nav-item" onclick="showScreen(3)" data-screen="3">
+    ⚡
+    <div class="tooltip">Decisions</div>
+  </div>
+  <div class="nav-item" onclick="showScreen(4)" data-screen="4">
+    🗺️
+    <div class="tooltip">Distribution</div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="nav-item">⚙️<div class="tooltip">Settings</div></div>
+    <div class="avatar">JL</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-brand"><span>FreshGuard</span> AI Platform</div>
+    <div class="topbar-breadcrumb">
+      <span id="breadcrumb">Global Control Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill"><div class="status-dot"></div> All Systems Operational</div>
+      <div class="topbar-time" id="clock">--:--:-- UTC</div>
+      <div class="notif-btn">🔔<div class="notif-badge"></div></div>
+    </div>
+  </header>
+
+  <!-- SCREEN TABS -->
+  <div class="screen-tabs">
+    <div class="tab active" onclick="showScreen(0)"><span class="tab-icon">🌍</span> Global Control</div>
+    <div class="tab" onclick="showScreen(1)"><span class="tab-icon">📦</span> Digital Twin — SHP-04821</div>
+    <div class="tab" onclick="showScreen(2)"><span class="tab-icon">🤖</span> AI Risk Analysis</div>
+    <div class="tab" onclick="showScreen(3)"><span class="tab-icon">⚡</span> Logistics Decisions</div>
+    <div class="tab" onclick="showScreen(4)"><span class="tab-icon">🗺️</span> Distribution Allocation</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ====================== SCREEN 1: GLOBAL CONTROL ====================== -->
+    <div class="screen active" id="screen-0">
+
+      <!-- KPI ROW -->
+      <div class="grid-4 mb-16">
+        <div class="kpi-card purple">
+          <div class="kpi-label">Active Shipments</div>
+          <div class="kpi-value">247</div>
+          <div class="kpi-sub"><span class="delta up">+12</span> vs last week</div>
+          <div class="kpi-icon">🚢</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label">Containers at Risk</div>
+          <div class="kpi-value">18</div>
+          <div class="kpi-sub"><span class="delta down">+3</span> new alerts today</div>
+          <div class="kpi-icon">⚠️</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-label">Predicted Spoilage Rate</div>
+          <div class="kpi-value">2.4<span style="font-size:16px">%</span></div>
+          <div class="kpi-sub"><span class="delta up">−0.3%</span> vs forecast</div>
+          <div class="kpi-icon">📊</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-label">Avg Shelf Life Remaining</div>
+          <div class="kpi-value">8.2<span style="font-size:16px">d</span></div>
+          <div class="kpi-sub"><span class="delta up">+0.8d</span> above target</div>
+          <div class="kpi-icon">⏱️</div>
+        </div>
+      </div>
+
+      <!-- MAP + ALERTS -->
+      <div class="grid-map mb-16">
+        <!-- World Map -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🌍</span> Live Shipment Tracking</div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <span class="tag badge-normal">● Normal 211</span>
+              <span class="tag badge-warning">● Warning 18</span>
+              <span class="tag badge-risk">● At Risk 18</span>
+              <span class="card-action">Full Map →</span>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="world-map-container">
+              <svg viewBox="0 0 1000 500" class="map-svg" id="worldMap" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="oceanGrad" cx="50%" cy="50%" r="70%">
+                    <stop offset="0%" stop-color="#dde8f8"/>
+                    <stop offset="100%" stop-color="#c5d6f0"/>
+                  </radialGradient>
+                  <filter id="landShadow" x="-5%" y="-5%" width="110%" height="110%">
+                    <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-color="rgba(100,130,180,0.25)"/>
+                  </filter>
+                </defs>
+                <rect width="1000" height="500" fill="url(#oceanGrad)"/>
+
+                <!-- ===== CONTINENTS (accurate simplified paths) ===== -->
+                <!-- NORTH AMERICA -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M72,28 L90,24 L110,22 L132,26 L148,22 L158,28 L162,38 L158,50 L150,58 L148,68
+                     L152,78 L158,88 L160,100 L158,108 L152,112 L142,116 L136,122 L132,130 L128,140
+                     L122,148 L116,152 L108,150 L100,144 L94,136 L88,128 L82,118 L76,108 L68,100
+                     L62,92 L58,82 L56,70 L58,58 L62,46 L68,36 Z"/>
+                <!-- Alaska bulge -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M56,58 L62,52 L72,48 L78,42 L72,38 L62,40 L56,46 Z"/>
+                <!-- Greenland -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M178,8 L196,6 L208,10 L212,20 L206,30 L196,36 L184,34 L176,26 L174,16 Z"/>
+                <!-- Canada lower body -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M68,100 L80,98 L94,96 L108,98 L120,100 L132,100 L140,108 L148,116 L152,128
+                     L148,140 L142,150 L134,158 L124,164 L114,168 L104,170 L96,166 L88,158 L80,148
+                     L72,138 L66,126 L64,114 L66,106 Z"/>
+                <!-- USA -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M68,148 L80,148 L96,148 L112,148 L128,148 L142,148 L152,152 L158,162 L158,174
+                     L154,184 L146,192 L136,196 L124,198 L112,198 L100,196 L88,190 L78,182 L70,172
+                     L64,162 L64,152 Z"/>
+                <!-- Florida -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M134,196 L138,204 L136,212 L130,216 L126,210 L126,200 Z"/>
+                <!-- Mexico + Central America -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M80,196 L90,196 L100,198 L108,202 L114,210 L112,220 L106,228 L100,232
+                     L94,228 L88,220 L82,212 L78,204 Z"/>
+                <!-- Caribbean islands (dots) -->
+                <circle cx="146" cy="210" r="2.5" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"/>
+                <circle cx="154" cy="214" r="2" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"/>
+                <circle cx="160" cy="218" r="1.5" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5"/>
+
+                <!-- SOUTH AMERICA -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M104,236 L118,232 L132,232 L144,236 L152,244 L156,256 L156,268 L154,282
+                     L150,296 L146,312 L140,330 L134,348 L126,362 L118,372 L112,376 L106,372
+                     L100,362 L96,348 L92,332 L90,316 L90,300 L92,284 L96,268 L98,252 L100,240 Z"/>
+
+                <!-- EUROPE -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M382,28 L394,24 L408,22 L420,24 L432,28 L442,34 L448,42 L448,52 L444,60
+                     L436,66 L426,70 L416,72 L408,74 L400,76 L392,72 L386,64 L382,54 L380,44 Z"/>
+                <!-- Scandinavia -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M408,22 L416,16 L422,10 L428,8 L434,12 L434,22 L428,30 L420,34 L412,32 Z"/>
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M422,10 L430,6 L438,4 L444,8 L448,16 L446,24 L440,28 L432,26 L424,18 Z"/>
+                <!-- UK -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M364,34 L372,30 L378,34 L378,44 L372,50 L364,46 L360,38 Z"/>
+                <!-- Ireland -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M354,38 L360,34 L362,42 L356,46 Z"/>
+                <!-- Iberian Peninsula -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M368,72 L380,70 L390,74 L394,84 L390,94 L380,100 L370,98 L362,90 L360,80 L364,72 Z"/>
+                <!-- France/Germany/Central Europe -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M382,54 L396,52 L410,52 L424,54 L434,60 L438,70 L432,78 L420,82 L408,84
+                     L396,82 L384,78 L376,70 L376,60 Z"/>
+                <!-- Italy -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M406,82 L414,80 L420,86 L420,98 L416,110 L410,118 L404,116 L402,104 L402,92 Z"/>
+                <!-- Balkans / Eastern Europe -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M424,54 L440,52 L456,52 L468,56 L472,66 L466,76 L454,80 L440,80 L428,76 L420,68 L422,58 Z"/>
+                <!-- Greece -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M432,84 L440,82 L444,90 L438,96 L432,94 Z"/>
+
+                <!-- AFRICA -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M382,104 L400,100 L418,100 L434,104 L446,112 L454,124 L458,138 L458,154
+                     L456,170 L452,186 L448,202 L444,218 L438,234 L430,250 L420,264 L408,276
+                     L396,282 L384,280 L374,270 L366,256 L360,240 L356,224 L354,208 L354,192
+                     L356,176 L360,160 L364,144 L368,128 L372,114 L378,106 Z"/>
+                <!-- Madagascar -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M468,212 L474,206 L480,212 L480,226 L476,234 L470,232 L466,222 Z"/>
+
+                <!-- RUSSIA / NORTH ASIA -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M468,8 L500,6 L540,4 L580,4 L620,6 L660,8 L700,12 L730,18 L750,26 L760,36
+                     L756,46 L744,52 L728,56 L710,58 L692,60 L672,60 L652,58 L634,56 L618,54
+                     L600,52 L582,50 L564,50 L548,52 L534,56 L520,60 L506,62 L492,62 L478,60
+                     L466,54 L462,44 L462,32 L464,20 Z"/>
+                <!-- Kamchatka -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M756,36 L768,32 L778,38 L778,52 L770,60 L760,58 L752,50 Z"/>
+
+                <!-- MIDDLE EAST -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M462,68 L478,64 L498,66 L514,70 L526,78 L530,90 L524,100 L512,106 L498,108
+                     L484,104 L472,96 L464,86 L462,76 Z"/>
+                <!-- Arabian Peninsula -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M484,104 L500,102 L518,104 L528,112 L530,128 L526,144 L518,154 L508,158
+                     L496,154 L486,144 L480,130 L480,116 Z"/>
+
+                <!-- SOUTH ASIA (Indian subcontinent) -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M530,60 L550,58 L572,60 L590,66 L602,76 L608,90 L608,106 L604,122 L598,138
+                     L590,152 L580,162 L570,168 L560,166 L550,158 L542,146 L536,132 L530,118
+                     L526,102 L524,86 L526,70 Z"/>
+                <!-- Sri Lanka -->
+                <circle cx="574" cy="176" r="3" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"/>
+
+                <!-- SOUTHEAST ASIA -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M600,66 L620,62 L640,64 L658,70 L666,80 L662,92 L650,98 L636,98 L622,94 L610,86 L602,76 Z"/>
+                <!-- Indochina -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M620,94 L636,94 L648,100 L654,112 L650,124 L640,130 L628,128 L620,118 L618,106 Z"/>
+                <!-- Malay Peninsula -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M634,128 L640,134 L638,148 L634,156 L630,150 L630,138 Z"/>
+                <!-- Borneo -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M648,146 L664,140 L676,148 L678,162 L670,172 L656,172 L646,162 L644,150 Z"/>
+                <!-- Sumatra -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M614,158 L630,152 L644,158 L644,168 L632,174 L616,170 Z"/>
+                <!-- Java -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5"
+                  d="M630,178 L648,174 L660,178 L656,184 L638,186 Z"/>
+                <!-- Philippines -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5"
+                  d="M670,118 L678,114 L682,122 L678,130 L672,128 Z"/>
+
+                <!-- EAST ASIA (China, Korea, Japan) -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M650,58 L672,56 L694,58 L716,62 L732,70 L738,82 L734,96 L726,108 L714,116
+                     L700,120 L684,118 L668,112 L656,102 L648,90 L646,76 L648,64 Z"/>
+                <!-- Korean Peninsula -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M726,92 L734,90 L738,98 L734,108 L726,110 L722,102 Z"/>
+                <!-- Japan - Honshu -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.7"
+                  d="M744,72 L756,68 L766,72 L772,82 L768,92 L758,96 L748,92 L742,82 Z"/>
+                <!-- Japan - Kyushu/Shikoku -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M750,96 L758,94 L762,102 L756,108 L750,104 Z"/>
+                <!-- Taiwan -->
+                <ellipse cx="730" cy="124" rx="4" ry="6" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5" transform="rotate(-10,730,124)"/>
+
+                <!-- AUSTRALIA -->
+                <path filter="url(#landShadow)" fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.8"
+                  d="M692,286 L716,280 L740,278 L764,280 L784,286 L798,298 L806,314 L806,332
+                     L800,350 L788,364 L772,374 L754,378 L736,376 L718,368 L702,354 L690,338
+                     L684,320 L684,302 Z"/>
+                <!-- Tasmania -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5"
+                  d="M744,384 L752,380 L756,388 L750,394 L744,390 Z"/>
+                <!-- New Zealand - North Island -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5"
+                  d="M820,346 L828,340 L832,350 L828,360 L820,358 Z"/>
+                <!-- New Zealand - South Island -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.5"
+                  d="M818,366 L828,362 L832,374 L824,382 L816,376 Z"/>
+
+                <!-- NEW GUINEA -->
+                <path fill="#cdd8f0" stroke="#b0c2e0" stroke-width="0.6"
+                  d="M688,256 L710,248 L730,248 L744,256 L744,266 L728,270 L708,268 L692,262 Z"/>
+
+                <!-- ===== SHIPPING ROUTES ===== -->
+                <!-- North America → Europe (normal, purple) -->
+                <path d="M124,168 Q290,80 410,68" stroke="#6b4fbb" stroke-width="1.5" fill="none" stroke-dasharray="6,4" opacity="0.55"/>
+                <!-- South America → Europe (normal, purple) -->
+                <path d="M120,260 Q280,220 390,130" stroke="#6b4fbb" stroke-width="1.3" fill="none" stroke-dasharray="5,4" opacity="0.4"/>
+                <!-- India → Europe (AT RISK, red) -->
+                <path d="M556,130 Q490,110 420,90" stroke="#ef4444" stroke-width="2" fill="none" stroke-dasharray="6,3" opacity="0.7"/>
+                <!-- SE Asia → Japan (normal) -->
+                <path d="M642,118 Q690,100 748,84" stroke="#22c55e" stroke-width="1.3" fill="none" stroke-dasharray="5,4" opacity="0.45"/>
+                <!-- S America → West Africa (normal) -->
+                <path d="M120,260 Q230,250 356,220" stroke="#22c55e" stroke-width="1.2" fill="none" stroke-dasharray="4,4" opacity="0.4"/>
+                <!-- Cartagena → Hamburg (warning, amber) -->
+                <path d="M118,244 Q230,160 406,62" stroke="#f59e0b" stroke-width="1.8" fill="none" stroke-dasharray="6,3" opacity="0.6"/>
+                <!-- SE Asia → Australia (normal) -->
+                <path d="M660,170 Q680,240 720,294" stroke="#22c55e" stroke-width="1.2" fill="none" stroke-dasharray="4,4" opacity="0.4"/>
+                <!-- Manzanillo → Tokyo (normal) -->
+                <path d="M72,196 Q400,130 750,88" stroke="#22c55e" stroke-width="1.2" fill="none" stroke-dasharray="4,4" opacity="0.35"/>
+
+                <!-- ===== SHIPMENT PINS ===== -->
+                <!-- Los Angeles / North America coast (risk) -->
+                <g class="map-pin" onclick="showScreen(1)" style="cursor:pointer">
+                  <circle cx="68" cy="196" r="8" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+                  <circle class="ping-ring" cx="68" cy="196" r="10" fill="none" stroke="#ef4444" stroke-width="2"/>
+                  <text x="68" y="200" text-anchor="middle" font-size="9" fill="white" font-weight="800">!</text>
+                </g>
+                <!-- Cartagena, Colombia (warning) -->
+                <g class="map-pin">
+                  <circle cx="118" cy="244" r="7" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+                  <circle class="ping-ring" cx="118" cy="244" r="9" fill="none" stroke="#f59e0b" stroke-width="1.5" style="animation-delay:0.4s"/>
+                </g>
+                <!-- Santos, Brazil (normal) -->
+                <g class="map-pin">
+                  <circle cx="150" cy="316" r="6" fill="#22c55e" stroke="#fff" stroke-width="1.5"/>
+                  <circle class="ping-ring" cx="150" cy="316" r="8" fill="none" stroke="#22c55e" stroke-width="1.5" style="animation-delay:0.9s"/>
+                </g>
+                <!-- Mid-Atlantic en route (normal) -->
+                <g class="map-pin">
+                  <circle cx="280" cy="200" r="6" fill="#22c55e" stroke="#fff" stroke-width="1.5"/>
+                </g>
+                <!-- Rotterdam port marker -->
+                <rect x="403" y="58" width="16" height="16" rx="4" fill="#6b4fbb"/>
+                <text x="411" y="69" text-anchor="middle" font-size="9" fill="white" font-weight="700">▲</text>
+                <!-- Hamburg port marker -->
+                <rect x="416" y="46" width="16" height="16" rx="4" fill="#6b4fbb"/>
+                <text x="424" y="57" text-anchor="middle" font-size="9" fill="white" font-weight="700">▲</text>
+                <!-- Mumbai / India Ocean (AT RISK — SHP-04821) -->
+                <g class="map-pin" onclick="showScreen(1)" style="cursor:pointer">
+                  <circle cx="556" cy="130" r="8" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+                  <circle class="ping-ring" cx="556" cy="130" r="11" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+                  <text x="556" y="134" text-anchor="middle" font-size="9" fill="white" font-weight="800">!</text>
+                </g>
+                <!-- Arabian Sea / mid-transit (warning) -->
+                <g class="map-pin">
+                  <circle cx="490" cy="148" r="7" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+                  <circle class="ping-ring" cx="490" cy="148" r="9" fill="none" stroke="#f59e0b" stroke-width="1.5" style="animation-delay:0.6s"/>
+                </g>
+                <!-- SE Asia / South China Sea (normal) -->
+                <g class="map-pin">
+                  <circle cx="642" cy="148" r="6" fill="#22c55e" stroke="#fff" stroke-width="1.5"/>
+                </g>
+                <!-- Tokyo port marker -->
+                <rect x="756" y="80" width="16" height="16" rx="4" fill="#6b4fbb"/>
+                <text x="764" y="91" text-anchor="middle" font-size="9" fill="white" font-weight="700">▲</text>
+                <!-- North Pacific en route (normal) -->
+                <g class="map-pin">
+                  <circle cx="860" cy="150" r="6" fill="#22c55e" stroke="#fff" stroke-width="1.5"/>
+                </g>
+                <!-- Australia / Brisbane (normal) -->
+                <g class="map-pin">
+                  <circle cx="796" cy="330" r="6" fill="#22c55e" stroke="#fff" stroke-width="1.5"/>
+                </g>
+
+                <!-- Region labels -->
+                <text x="96" y="148" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">North America</text>
+                <text x="110" y="290" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">South America</text>
+                <text x="388" y="150" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Africa</text>
+                <text x="390" y="52" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Europe</text>
+                <text x="540" y="42" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Russia / Central Asia</text>
+                <text x="548" y="84" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">South Asia</text>
+                <text x="658" y="80" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">East Asia</text>
+                <text x="626" y="210" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">SE Asia</text>
+                <text x="718" y="346" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Australia</text>
+                <text x="450" y="186" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Indian Ocean</text>
+                <text x="200" y="270" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Atlantic Ocean</text>
+                <text x="860" y="240" font-size="10" fill="#7080a8" font-family="DM Sans,sans-serif" font-weight="500">Pacific Ocean</text>
+
+                <!-- SHP label on risk pin -->
+                <rect x="570" y="122" width="72" height="16" rx="4" fill="rgba(239,68,68,0.9)"/>
+                <text x="606" y="133" text-anchor="middle" font-size="9" fill="white" font-weight="700" font-family="DM Sans,sans-serif">SHP-04821 ⚠</text>
+
+                <!-- Legend -->
+                <rect x="14" y="462" width="290" height="26" rx="6" fill="rgba(255,255,255,0.9)" stroke="#e4e6ef" stroke-width="1"/>
+                <circle cx="32" cy="475" r="5" fill="#22c55e"/>
+                <text x="41" y="479" font-size="9" fill="#4b5068" font-family="DM Sans,sans-serif">Normal</text>
+                <circle cx="94" cy="475" r="5" fill="#f59e0b"/>
+                <text x="103" y="479" font-size="9" fill="#4b5068" font-family="DM Sans,sans-serif">Warning</text>
+                <circle cx="158" cy="475" r="5" fill="#ef4444"/>
+                <text x="167" y="479" font-size="9" fill="#4b5068" font-family="DM Sans,sans-serif">At Risk</text>
+                <rect x="212" y="470" width="9" height="9" rx="2" fill="#6b4fbb"/>
+                <text x="225" y="479" font-size="9" fill="#4b5068" font-family="DM Sans,sans-serif">Port</text>
+                <line x1="255" y1="472" x2="270" y2="472" stroke="#6b4fbb" stroke-width="1.5" stroke-dasharray="4,2"/>
+                <text x="274" y="479" font-size="9" fill="#4b5068" font-family="DM Sans,sans-serif">Route</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel: Alerts + Shipment List -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Active Alerts -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🚨</span> Active Alerts</div>
+              <span class="tag badge-risk">5 Critical</span>
+            </div>
+            <div class="card-body" style="padding: 12px 16px;">
+              <div class="alert-item critical">
+                <div class="alert-icon">🌡️</div>
+                <div class="alert-text">
+                  <div class="alert-title">Temp Excursion — SHP-04821</div>
+                  <div class="alert-desc">+4.2°C above threshold · Indian Ocean</div>
+                </div>
+                <div class="alert-time">2m ago</div>
+              </div>
+              <div class="alert-item critical">
+                <div class="alert-icon">💧</div>
+                <div class="alert-text">
+                  <div class="alert-title">High Humidity — SHP-03917</div>
+                  <div class="alert-desc">94% RH · Atlantic transit</div>
+                </div>
+                <div class="alert-time">11m ago</div>
+              </div>
+              <div class="alert-item warning">
+                <div class="alert-icon">📈</div>
+                <div class="alert-text">
+                  <div class="alert-title">Ethylene Spike — SHP-05102</div>
+                  <div class="alert-desc">Accelerated ripening detected</div>
+                </div>
+                <div class="alert-time">28m ago</div>
+              </div>
+              <div class="alert-item info">
+                <div class="alert-icon">⏰</div>
+                <div class="alert-text">
+                  <div class="alert-title">Shelf Life Warning — SHP-02744</div>
+                  <div class="alert-desc">≤3 days remaining on arrival</div>
+                </div>
+                <div class="alert-time">1h ago</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipment List -->
+          <div class="card" style="flex:1">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📋</span> Recent Shipments</div>
+              <span class="card-action">View All</span>
+            </div>
+            <div class="card-body" style="padding:10px 16px;">
+              <div class="shipment-item">
+                <div class="ship-dot risk"></div>
+                <div class="ship-info">
+                  <div class="ship-id">SHP-04821</div>
+                  <div class="ship-route">Mumbai → Rotterdam · Bananas</div>
+                </div>
+                <span class="ship-badge badge-risk">At Risk</span>
+              </div>
+              <div class="shipment-item">
+                <div class="ship-dot warning"></div>
+                <div class="ship-info">
+                  <div class="ship-id">SHP-03917</div>
+                  <div class="ship-route">Cartagena → Hamburg · Pineapples</div>
+                </div>
+                <span class="ship-badge badge-warning">Warning</span>
+              </div>
+              <div class="shipment-item">
+                <div class="ship-dot normal"></div>
+                <div class="ship-info">
+                  <div class="ship-id">SHP-05102</div>
+                  <div class="ship-route">Manzanillo → Tokyo · Avocados</div>
+                </div>
+                <span class="ship-badge badge-normal">Normal</span>
+              </div>
+              <div class="shipment-item">
+                <div class="ship-dot normal"></div>
+                <div class="ship-info">
+                  <div class="ship-id">SHP-02744</div>
+                  <div class="ship-route">Guayaquil → Antwerp · Bananas</div>
+                </div>
+                <span class="ship-badge badge-normal">Normal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="grid-main">
+        <!-- Temperature Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🌡️</span> Fleet Temperature Trends (24h)</div>
+            <div style="display:flex;gap:8px">
+              <span class="tag badge-normal">● Avg Normal</span>
+              <span class="tag badge-risk">● Risk Units</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <svg width="100%" height="140" viewBox="0 0 500 140">
+              <defs>
+                <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#6b4fbb" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#6b4fbb" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="riskGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.12"/>
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid -->
+              <line x1="0" y1="30" x2="500" y2="30" stroke="#e4e6ef" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="0" y1="60" x2="500" y2="60" stroke="#e4e6ef" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="0" y1="90" x2="500" y2="90" stroke="#e4e6ef" stroke-width="1" stroke-dasharray="3,3"/>
+              <line x1="0" y1="120" x2="500" y2="120" stroke="#e4e6ef" stroke-width="1" stroke-dasharray="3,3"/>
+              <!-- Labels -->
+              <text x="0" y="28" font-size="9" fill="#8b91a8" font-family="JetBrains Mono">8°C</text>
+              <text x="0" y="58" font-size="9" fill="#8b91a8" font-family="JetBrains Mono">6°C</text>
+              <text x="0" y="88" font-size="9" fill="#8b91a8" font-family="JetBrains Mono">4°C</text>
+              <text x="0" y="118" font-size="9" fill="#8b91a8" font-family="JetBrains Mono">2°C</text>
+              <!-- Normal line fill -->
+              <path d="M30,90 L80,85 L130,80 L180,82 L230,78 L280,75 L330,72 L380,74 L430,70 L480,68 L480,120 L30,120 Z" fill="url(#tempGrad)"/>
+              <path d="M30,90 L80,85 L130,80 L180,82 L230,78 L280,75 L330,72 L380,74 L430,70 L480,68" fill="none" stroke="#6b4fbb" stroke-width="2" stroke-linecap="round"/>
+              <!-- Risk line -->
+              <path d="M30,85 L80,88 L130,92 L180,85 L230,80 L280,72 L330,60 L380,55 L430,52 L480,48 L480,120 L30,120 Z" fill="url(#riskGrad)"/>
+              <path d="M30,85 L80,88 L130,92 L180,85 L230,80 L280,72 L330,60 L380,55 L430,52 L480,48" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-dasharray="4,2"/>
+              <!-- Threshold line -->
+              <line x1="30" y1="60" x2="480" y2="60" stroke="#f59e0b" stroke-width="1" stroke-dasharray="6,3" opacity="0.7"/>
+              <text x="435" y="56" font-size="9" fill="#d97706" font-weight="600" font-family="DM Sans">Threshold</text>
+              <!-- X labels -->
+              <text x="30" y="136" font-size="9" fill="#8b91a8" font-family="JetBrains Mono" text-anchor="middle">00:00</text>
+              <text x="155" y="136" font-size="9" fill="#8b91a8" font-family="JetBrains Mono" text-anchor="middle">06:00</text>
+              <text x="280" y="136" font-size="9" fill="#8b91a8" font-family="JetBrains Mono" text-anchor="middle">12:00</text>
+              <text x="405" y="136" font-size="9" fill="#8b91a8" font-family="JetBrains Mono" text-anchor="middle">18:00</text>
+              <text x="480" y="136" font-size="9" fill="#8b91a8" font-family="JetBrains Mono" text-anchor="middle">Now</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Humidity + Container Status -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">💧</span> Humidity Distribution & Container Status</div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+              <!-- Humidity bars -->
+              <div>
+                <div class="section-title">Humidity Bands</div>
+                <div style="margin-bottom:10px">
+                  <div class="flex-between" style="margin-bottom:4px">
+                    <span style="font-size:11px;color:var(--text-2)">85–90% RH (optimal)</span>
+                    <span style="font-size:11px;font-weight:600;font-family:var(--mono)">142</span>
+                  </div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:58%;background:var(--green)"></div></div>
+                </div>
+                <div style="margin-bottom:10px">
+                  <div class="flex-between" style="margin-bottom:4px">
+                    <span style="font-size:11px;color:var(--text-2)">90–95% RH (warning)</span>
+                    <span style="font-size:11px;font-weight:600;font-family:var(--mono)">73</span>
+                  </div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--amber)"></div></div>
+                </div>
+                <div style="margin-bottom:10px">
+                  <div class="flex-between" style="margin-bottom:4px">
+                    <span style="font-size:11px;color:var(--text-2)">&gt;95% RH (critical)</span>
+                    <span style="font-size:11px;font-weight:600;font-family:var(--mono)">32</span>
+                  </div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:13%;background:var(--red)"></div></div>
+                </div>
+                <div>
+                  <div class="flex-between" style="margin-bottom:4px">
+                    <span style="font-size:11px;color:var(--text-2)">&lt;85% RH (dry)</span>
+                    <span style="font-size:11px;font-weight:600;font-family:var(--mono)">0</span>
+                  </div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--blue)"></div></div>
+                </div>
+              </div>
+              <!-- Donut chart -->
+              <div style="text-align:center">
+                <div class="section-title" style="text-align:center">Container Status</div>
+                <svg width="110" height="110" viewBox="0 0 110 110" style="display:block;margin:0 auto 8px">
+                  <!-- Donut segments -->
+                  <circle cx="55" cy="55" r="38" fill="none" stroke="#f0f1f5" stroke-width="14"/>
+                  <!-- Green: 211/247 = 85.4% = 306.4° -->
+                  <circle cx="55" cy="55" r="38" fill="none" stroke="#22c55e" stroke-width="14"
+                    stroke-dasharray="85.5 100" stroke-dashoffset="25" pathLength="100" 
+                    transform="rotate(-90,55,55)"/>
+                  <!-- Amber: 18/247 = 7.3% -->
+                  <circle cx="55" cy="55" r="38" fill="none" stroke="#f59e0b" stroke-width="14"
+                    stroke-dasharray="7.3 100" stroke-dashoffset="-60.5" pathLength="100"
+                    transform="rotate(-90,55,55)"/>
+                  <!-- Red: 18/247 = 7.3% -->
+                  <circle cx="55" cy="55" r="38" fill="none" stroke="#ef4444" stroke-width="14"
+                    stroke-dasharray="7.3 100" stroke-dashoffset="-67.8" pathLength="100"
+                    transform="rotate(-90,55,55)"/>
+                  <text x="55" y="51" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1d2e" font-family="JetBrains Mono">247</text>
+                  <text x="55" y="64" text-anchor="middle" font-size="9" fill="#8b91a8" font-family="DM Sans">total</text>
+                </svg>
+                <div style="font-size:10px;color:var(--text-3);line-height:1.8">
+                  <div>🟢 Normal: <b style="color:var(--text)">211</b></div>
+                  <div>🟡 Warning: <b style="color:var(--text)">18</b></div>
+                  <div>🔴 At Risk: <b style="color:var(--text)">18</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /screen-0 -->
+
+    <!-- ====================== SCREEN 2: DIGITAL TWIN ====================== -->
+    <div class="screen" id="screen-1">
+
+      <!-- Header info bar -->
+      <div class="card mb-16" style="padding:14px 20px">
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;color:var(--text-3);font-weight:500;text-transform:uppercase;letter-spacing:0.06em">Shipment ID</div>
+            <div style="font-size:18px;font-weight:700;font-family:var(--mono);color:var(--purple)">SHP-04821</div>
+          </div>
+          <div style="width:1px;height:36px;background:var(--border)"></div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3)">Route</div>
+            <div style="font-size:13px;font-weight:600">Mumbai → Rotterdam</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3)">Commodity</div>
+            <div style="font-size:13px;font-weight:600">🍌 Bananas — 18.4 MT</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3)">ETA</div>
+            <div style="font-size:13px;font-weight:600">Mar 22, 2026 · 09:40 UTC</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3)">Days in Transit</div>
+            <div style="font-size:13px;font-weight:600;font-family:var(--mono)">7 / 18 days</div>
+          </div>
+          <div style="margin-left:auto">
+            <span class="ship-badge badge-risk" style="font-size:12px;padding:6px 12px">⚠ AT RISK</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Digital Twin visualization -->
+      <div class="twin-container mb-16">
+        <div style="margin-bottom:16px">
+          <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4)">Digital Twin Environment Model</span>
+        </div>
+        <div class="twin-grid">
+          <!-- 3D Container SVG -->
+          <div class="container-3d">
+            <svg viewBox="0 0 560 270" width="100%" style="filter:drop-shadow(0 10px 30px rgba(0,0,0,0.5))">
+              <defs>
+                <!-- Front face gradient: slightly lighter blue-grey -->
+                <linearGradient id="frontFace" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2a3a6e"/>
+                  <stop offset="100%" stop-color="#1a274e"/>
+                </linearGradient>
+                <!-- Top face gradient: lighter, catching light -->
+                <linearGradient id="topFace" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#3a4e88"/>
+                  <stop offset="100%" stop-color="#253368"/>
+                </linearGradient>
+                <!-- Left side face: darkest (shadow side) -->
+                <linearGradient id="leftFace" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#161f40"/>
+                  <stop offset="100%" stop-color="#0e1530"/>
+                </linearGradient>
+                <!-- Door face gradient: same as front but darker on edge -->
+                <linearGradient id="doorFace" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#1e2e5c"/>
+                  <stop offset="100%" stop-color="#2a3a6e"/>
+                </linearGradient>
+                <!-- Cooling unit gradient -->
+                <linearGradient id="coolerGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3d5090"/>
+                  <stop offset="100%" stop-color="#2a3a70"/>
+                </linearGradient>
+                <!-- Temperature heat overlay (right zone hot) -->
+                <linearGradient id="heatOverlay" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="rgba(0,184,169,0.08)"/>
+                  <stop offset="55%" stop-color="rgba(0,184,169,0.04)"/>
+                  <stop offset="75%" stop-color="rgba(239,100,50,0.06)"/>
+                  <stop offset="100%" stop-color="rgba(239,68,68,0.18)"/>
+                </linearGradient>
+                <!-- Teal airflow glow -->
+                <radialGradient id="airGlow" cx="10%" cy="50%" r="40%">
+                  <stop offset="0%" stop-color="#00b8a9" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#00b8a9" stop-opacity="0"/>
+                </radialGradient>
+                <!-- Pallet gradients -->
+                <linearGradient id="palletA" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fbbf24"/>
+                  <stop offset="100%" stop-color="#d97706"/>
+                </linearGradient>
+                <linearGradient id="palletB" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f97316"/>
+                  <stop offset="100%" stop-color="#c2410c"/>
+                </linearGradient>
+                <linearGradient id="palletRisk" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f87171"/>
+                  <stop offset="100%" stop-color="#b91c1c"/>
+                </linearGradient>
+              </defs>
+
+              <!-- ======================================================
+                   ISO 40-FOOT REEFER CONTAINER — 3-point perspective
+                   Isometric: front face, top face, left narrow side
+                   ====================================================== -->
+
+              <!-- LEFT SIDE FACE (narrow, perspective end) -->
+              <path d="M38,52 L38,210 L78,230 L78,72 Z"
+                    fill="url(#leftFace)" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+              <!-- Corner post left -->
+              <rect x="34" y="52" width="6" height="158" rx="1" fill="#0f1830"/>
+
+              <!-- TOP FACE -->
+              <path d="M38,52 L78,72 L520,72 L480,52 Z"
+                    fill="url(#topFace)" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
+              <!-- Top corrugation lines -->
+              <line x1="118" y1="52" x2="130" y2="72" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+              <line x1="198" y1="52" x2="210" y2="72" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+              <line x1="278" y1="52" x2="290" y2="72" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+              <line x1="358" y1="52" x2="370" y2="72" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+              <line x1="438" y1="52" x2="450" y2="72" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+
+              <!-- MAIN FRONT FACE -->
+              <rect x="78" y="72" width="442" height="158" fill="url(#frontFace)"/>
+              <!-- Heat overlay on front face -->
+              <rect x="78" y="72" width="442" height="158" fill="url(#heatOverlay)"/>
+              <!-- Air glow near cooling unit -->
+              <rect x="78" y="72" width="442" height="158" fill="url(#airGlow)"/>
+
+              <!-- ========================
+                   CORRUGATION RIBS (vertical panels typical of ISO container)
+                   ======================== -->
+              <!-- Corrugation shadows — 8 panels across front face -->
+              <rect x="136" y="72" width="4" height="158" fill="rgba(0,0,0,0.18)" rx="1"/>
+              <rect x="194" y="72" width="4" height="158" fill="rgba(0,0,0,0.18)" rx="1"/>
+              <rect x="252" y="72" width="4" height="158" fill="rgba(0,0,0,0.18)" rx="1"/>
+              <rect x="310" y="72" width="4" height="158" fill="rgba(0,0,0,0.18)" rx="1"/>
+              <rect x="368" y="72" width="4" height="158" fill="rgba(0,0,0,0.18)" rx="1"/>
+              <rect x="426" y="72" width="4" height="158" fill="rgba(0,0,0,0.18)" rx="1"/>
+              <!-- Corrugation highlight edges -->
+              <rect x="138" y="72" width="1.5" height="158" fill="rgba(255,255,255,0.07)"/>
+              <rect x="196" y="72" width="1.5" height="158" fill="rgba(255,255,255,0.07)"/>
+              <rect x="254" y="72" width="1.5" height="158" fill="rgba(255,255,255,0.07)"/>
+              <rect x="312" y="72" width="1.5" height="158" fill="rgba(255,255,255,0.07)"/>
+              <rect x="370" y="72" width="1.5" height="158" fill="rgba(255,255,255,0.07)"/>
+              <rect x="428" y="72" width="1.5" height="158" fill="rgba(255,255,255,0.07)"/>
+
+              <!-- Horizontal top rail -->
+              <rect x="78" y="72" width="442" height="8" fill="rgba(0,0,0,0.25)" rx="0"/>
+              <!-- Horizontal bottom rail -->
+              <rect x="78" y="222" width="442" height="8" fill="rgba(0,0,0,0.3)" rx="0"/>
+              <!-- Horizontal mid-rail -->
+              <rect x="78" y="148" width="442" height="4" fill="rgba(0,0,0,0.12)"/>
+
+              <!-- ========================
+                   DOOR SECTION (right 30% of front face)
+                   ======================== -->
+              <!-- Door panel background — slightly different shade -->
+              <rect x="426" y="72" width="94" height="158" fill="url(#doorFace)"/>
+              <rect x="426" y="72" width="94" height="158" fill="rgba(0,0,0,0.08)"/>
+              <!-- Door split line (two door leaves) -->
+              <line x1="473" y1="80" x2="473" y2="222" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+              <!-- Door hinges left -->
+              <rect x="427" y="94" width="7" height="12" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <rect x="427" y="150" width="7" height="12" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <rect x="427" y="204" width="7" height="10" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <!-- Door hinges right -->
+              <rect x="512" y="94" width="7" height="12" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <rect x="512" y="150" width="7" height="12" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <rect x="512" y="204" width="7" height="10" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <!-- Door locking rod left leaf -->
+              <rect x="450" y="82" width="3" height="130" rx="1.5" fill="rgba(255,255,255,0.22)"/>
+              <!-- Door locking rod right leaf -->
+              <rect x="490" y="82" width="3" height="130" rx="1.5" fill="rgba(255,255,255,0.22)"/>
+              <!-- DOOR SEALED badge -->
+              <rect x="432" y="132" width="84" height="18" rx="4" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+              <text x="474" y="144" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.5)" font-family="JetBrains Mono, monospace" font-weight="600" letter-spacing="0.5">DOOR SEALED</text>
+
+              <!-- ========================
+                   CORNER POSTS (structural steel)
+                   ======================== -->
+              <!-- Top-left corner post -->
+              <rect x="76" y="70" width="6" height="162" rx="1" fill="#1a2450"/>
+              <!-- Top-right corner post -->
+              <rect x="516" y="70" width="6" height="162" rx="1" fill="#1a2450"/>
+              <!-- Bottom rail -->
+              <rect x="38" y="226" width="484" height="7" rx="2" fill="#0e1830"/>
+
+              <!-- ========================
+                   COOLING UNIT (top-right, mounted above container)
+                   ======================== -->
+              <rect x="370" y="28" width="140" height="30" rx="5" fill="url(#coolerGrad)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+              <!-- Cooling unit grille lines -->
+              <line x1="385" y1="32" x2="385" y2="54" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <line x1="398" y1="32" x2="398" y2="54" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <line x1="411" y1="32" x2="411" y2="54" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <line x1="424" y1="32" x2="424" y2="54" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <!-- Cooling unit label -->
+              <rect x="435" y="33" width="68" height="22" rx="3" fill="rgba(0,184,169,0.25)" stroke="rgba(0,184,169,0.5)" stroke-width="0.8"/>
+              <text x="469" y="47" text-anchor="middle" font-size="8" fill="rgba(0,220,210,0.9)" font-family="DM Sans,sans-serif" font-weight="600">❄ COOLING</text>
+              <!-- Mounting bracket -->
+              <rect x="420" y="54" width="4" height="18" rx="1" fill="rgba(255,255,255,0.15)"/>
+              <rect x="478" y="54" width="4" height="18" rx="1" fill="rgba(255,255,255,0.15)"/>
+
+              <!-- ========================
+                   CARGO PALLETS (viewed from front, inside container)
+                   ======================== -->
+              <!-- Pallet A1 -->
+              <rect x="96" y="164" width="52" height="46" rx="3" fill="url(#palletA)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+              <rect x="96" y="164" width="52" height="6" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <text x="122" y="192" text-anchor="middle" font-size="9" fill="rgba(0,0,0,0.7)" font-weight="700" font-family="DM Sans,sans-serif">A1</text>
+              <text x="122" y="203" text-anchor="middle" font-size="7" fill="rgba(0,0,0,0.5)" font-family="DM Sans,sans-serif">OK</text>
+
+              <!-- Pallet A2 -->
+              <rect x="156" y="164" width="52" height="46" rx="3" fill="url(#palletA)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+              <rect x="156" y="164" width="52" height="6" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <text x="182" y="192" text-anchor="middle" font-size="9" fill="rgba(0,0,0,0.7)" font-weight="700" font-family="DM Sans,sans-serif">A2</text>
+              <text x="182" y="203" text-anchor="middle" font-size="7" fill="rgba(0,0,0,0.5)" font-family="DM Sans,sans-serif">OK</text>
+
+              <!-- Pallet A3 -->
+              <rect x="216" y="164" width="52" height="46" rx="3" fill="url(#palletA)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+              <rect x="216" y="164" width="52" height="6" rx="2" fill="rgba(255,255,255,0.15)"/>
+              <text x="242" y="192" text-anchor="middle" font-size="9" fill="rgba(0,0,0,0.7)" font-weight="700" font-family="DM Sans,sans-serif">A3</text>
+              <text x="242" y="203" text-anchor="middle" font-size="7" fill="rgba(0,0,0,0.5)" font-family="DM Sans,sans-serif">OK</text>
+
+              <!-- Pallet B1 -->
+              <rect x="276" y="164" width="52" height="46" rx="3" fill="url(#palletB)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+              <rect x="276" y="164" width="52" height="6" rx="2" fill="rgba(255,255,255,0.12)"/>
+              <text x="302" y="192" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.85)" font-weight="700" font-family="DM Sans,sans-serif">B1</text>
+              <text x="302" y="203" text-anchor="middle" font-size="7" fill="rgba(255,200,100,0.8)" font-family="DM Sans,sans-serif">WARM</text>
+
+              <!-- Pallet B2 (AT RISK — red glow) -->
+              <rect x="330" y="156" width="58" height="54" rx="3" fill="url(#palletRisk)" stroke="#f87171" stroke-width="1.5"/>
+              <rect x="330" y="156" width="58" height="6" rx="2" fill="rgba(255,255,255,0.12)"/>
+              <!-- Risk glow halo -->
+              <rect x="326" y="152" width="66" height="62" rx="5" fill="none" stroke="rgba(248,113,113,0.4)" stroke-width="2"/>
+              <text x="359" y="184" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.95)" font-weight="700" font-family="DM Sans,sans-serif">B2</text>
+              <text x="359" y="198" text-anchor="middle" font-size="8" fill="#fca5a5" font-weight="600" font-family="DM Sans,sans-serif">⚠ RISK</text>
+              <text x="359" y="208" text-anchor="middle" font-size="7" fill="rgba(255,200,180,0.7)" font-family="DM Sans,sans-serif">17.6°C</text>
+
+              <!-- ========================
+                   TEMPERATURE SENSOR PROBES (floating data callouts)
+                   ======================== -->
+              <!-- Left zone sensor (zone A — normal) -->
+              <circle cx="170" cy="126" r="5" fill="#6b4fbb" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+              <line x1="170" y1="121" x2="170" y2="104" stroke="rgba(107,79,187,0.6)" stroke-width="1.2" stroke-dasharray="2.5,2"/>
+              <!-- Callout box -->
+              <rect x="138" y="88" width="64" height="18" rx="4" fill="rgba(107,79,187,0.85)"/>
+              <text x="170" y="100" text-anchor="middle" font-size="9" fill="white" font-weight="700" font-family="JetBrains Mono,monospace">13.4°C</text>
+
+              <!-- Right zone sensor (zone B — hot) -->
+              <circle cx="340" cy="120" r="5" fill="#ef4444" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+              <line x1="340" y1="115" x2="340" y2="97" stroke="rgba(239,68,68,0.6)" stroke-width="1.2" stroke-dasharray="2.5,2"/>
+              <!-- Callout box -->
+              <rect x="302" y="81" width="76" height="18" rx="4" fill="rgba(220,38,38,0.9)" stroke="rgba(255,100,100,0.4)" stroke-width="0.8"/>
+              <text x="340" y="93" text-anchor="middle" font-size="9" fill="white" font-weight="700" font-family="JetBrains Mono,monospace">17.6°C ⚠</text>
+
+              <!-- ========================
+                   AIRFLOW ARROWS (from cooling unit, left-to-right)
+                   ======================== -->
+              <!-- Arrow 1 -->
+              <path d="M92,110 L120,110" stroke="rgba(0,200,190,0.5)" stroke-width="1.5" fill="none"/>
+              <polygon points="120,107 126,110 120,113" fill="rgba(0,200,190,0.5)"/>
+              <!-- Arrow 2 -->
+              <path d="M92,120 L120,120" stroke="rgba(0,200,190,0.4)" stroke-width="1.5" fill="none"/>
+              <polygon points="120,117 126,120 120,123" fill="rgba(0,200,190,0.4)"/>
+              <!-- Arrow 3 -->
+              <path d="M92,130 L120,130" stroke="rgba(0,200,190,0.35)" stroke-width="1" fill="none"/>
+              <polygon points="120,127 126,130 120,133" fill="rgba(0,200,190,0.35)"/>
+
+              <!-- ========================
+                   CONTAINER IDENTIFICATION
+                   ======================== -->
+              <!-- ISO container number badge -->
+              <rect x="88" y="76" width="130" height="14" rx="2" fill="rgba(0,0,0,0.3)"/>
+              <text x="153" y="86" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.6)" font-family="JetBrains Mono,monospace" letter-spacing="0.5">FGDU 048210-5</text>
+
+              <!-- Bottom label -->
+              <text x="280" y="253" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.45)" font-family="JetBrains Mono,monospace" font-weight="500">CONT-FG-04821  ·  40ft ISO Reefer  ·  Mumbai → Rotterdam</text>
+
+              <!-- Danger badge bottom right -->
+              <rect x="436" y="234" width="100" height="18" rx="4" fill="rgba(239,68,68,0.85)"/>
+              <text x="486" y="246" text-anchor="middle" font-size="8" fill="white" font-weight="700" font-family="DM Sans,sans-serif">⚠ TEMP EXCURSION</text>
+            </svg>
+          </div>
+
+          <!-- Sensor readings -->
+          <div>
+            <div class="env-sensor">
+              <div class="sensor-icon">🌡️</div>
+              <div style="flex:1">
+                <div class="sensor-label">Temperature</div>
+                <div style="display:flex;align-items:baseline;gap:4px">
+                  <div class="sensor-value" style="color:#f87171">13.4</div>
+                  <div class="sensor-unit">°C</div>
+                  <span style="font-size:10px;color:#f87171;font-weight:600">⚠ +4.2°C</span>
+                </div>
+                <div class="sensor-bar"><div class="sensor-bar-fill" style="width:75%;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444)"></div></div>
+              </div>
+            </div>
+            <div class="env-sensor">
+              <div class="sensor-icon">💧</div>
+              <div style="flex:1">
+                <div class="sensor-label">Humidity</div>
+                <div style="display:flex;align-items:baseline;gap:4px">
+                  <div class="sensor-value">87.3</div>
+                  <div class="sensor-unit">% RH</div>
+                </div>
+                <div class="sensor-bar"><div class="sensor-bar-fill" style="width:87%;background:#6b4fbb"></div></div>
+              </div>
+            </div>
+            <div class="env-sensor">
+              <div class="sensor-icon">🌿</div>
+              <div style="flex:1">
+                <div class="sensor-label">Ethylene (C₂H₄)</div>
+                <div style="display:flex;align-items:baseline;gap:4px">
+                  <div class="sensor-value" style="color:#fbbf24">42</div>
+                  <div class="sensor-unit">ppm</div>
+                  <span style="font-size:10px;color:#fbbf24;font-weight:600">↑ elevated</span>
+                </div>
+                <div class="sensor-bar"><div class="sensor-bar-fill" style="width:42%;background:#f59e0b"></div></div>
+              </div>
+            </div>
+            <div class="env-sensor">
+              <div class="sensor-icon">📳</div>
+              <div style="flex:1">
+                <div class="sensor-label">Vibration</div>
+                <div style="display:flex;align-items:baseline;gap:4px">
+                  <div class="sensor-value">0.18</div>
+                  <div class="sensor-unit">g RMS</div>
+                </div>
+                <div class="sensor-bar"><div class="sensor-bar-fill" style="width:18%;background:var(--teal)"></div></div>
+              </div>
+            </div>
+            <div class="env-sensor">
+              <div class="sensor-icon">💨</div>
+              <div style="flex:1">
+                <div class="sensor-label">CO₂ Level</div>
+                <div style="display:flex;align-items:baseline;gap:4px">
+                  <div class="sensor-value">5.2</div>
+                  <div class="sensor-unit">%</div>
+                </div>
+                <div class="sensor-bar"><div class="sensor-bar-fill" style="width:52%;background:#3b82f6"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Freshness + Ripening -->
+      <div class="grid-3">
+        <!-- Freshness indicator -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🍌</span> Fruit Freshness Score</div>
+          </div>
+          <div class="card-body" style="text-align:center">
+            <svg width="130" height="130" viewBox="0 0 130 130" style="display:block;margin:0 auto">
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#f0f1f5" stroke-width="10"/>
+              <!-- 68% freshness -->
+              <circle cx="65" cy="65" r="52" fill="none" stroke="#f59e0b" stroke-width="10"
+                stroke-dasharray="221.7 326.7" stroke-linecap="round"
+                transform="rotate(-90,65,65)"/>
+              <text x="65" y="60" text-anchor="middle" font-size="26" font-weight="700" fill="#1a1d2e" font-family="JetBrains Mono">68</text>
+              <text x="65" y="74" text-anchor="middle" font-size="11" fill="#8b91a8" font-family="DM Sans">/ 100</text>
+              <text x="65" y="90" text-anchor="middle" font-size="10" fill="#d97706" font-weight="600" font-family="DM Sans">DECLINING</text>
+            </svg>
+            <div style="font-size:12px;color:var(--text-3);margin-top:8px">Updated 2 min ago</div>
+            <div style="font-size:11px;color:var(--text-2);margin-top:4px">Optimal range: 80–95</div>
+          </div>
+        </div>
+
+        <!-- Shelf Life Countdown -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">⏱️</span> Predicted Shelf Life</div>
+          </div>
+          <div class="card-body" style="text-align:center;padding-top:24px">
+            <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Days Remaining on Arrival</div>
+            <div class="shelf-countdown" style="font-size:48px;line-height:1">4.2</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:4px">days · ETA Mar 22</div>
+            <div style="margin-top:16px;padding:10px 14px;background:var(--red-dim);border-radius:8px;border:1px solid #fecaca">
+              <div style="font-size:12px;font-weight:600;color:#dc2626">⚠ Below minimum threshold</div>
+              <div style="font-size:11px;color:#dc2626;margin-top:2px">Target: ≥6 days. AI recommends expedited routing.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ripening Timeline -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📈</span> Ripening Progression</div>
+            <span class="card-action">Simulate</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:8px">Predicted maturity over transit timeline</div>
+            <div class="ripening-bar" style="margin-bottom:12px">
+              <div class="rip-seg" style="width:28%;background:#22c55e">Green</div>
+              <div class="rip-seg" style="width:22%;background:#84cc16">Turning</div>
+              <div class="rip-seg" style="width:22%;background:#eab308;position:relative">
+                Yellow
+                <div class="rip-now"></div>
+              </div>
+              <div class="rip-seg" style="width:18%;background:#f97316">Ripe</div>
+              <div class="rip-seg" style="width:10%;background:#ef4444">Over</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-3);font-family:var(--mono);margin-bottom:12px">
+              <span>Day 0</span><span>Day 5</span><span>Day 10</span><span>Day 15</span><span>Day 18</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-2)">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                <div style="width:8px;height:8px;border-radius:2px;background:#eab308"></div>
+                Current: <b>Yellow Stage</b> · Day 7.2
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                <div style="width:8px;height:8px;border-radius:2px;background:#f97316"></div>
+                Ripe at: <b>Day 11.4</b> (expected ETA: Day 18)
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;color:var(--red)">
+                <div style="width:8px;height:8px;border-radius:2px;background:#ef4444"></div>
+                Over-ripe risk: <b>Day 13.8+</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /screen-1 -->
+
+    <!-- ====================== SCREEN 3: AI PREDICTION ====================== -->
+    <div class="screen" id="screen-2">
+
+      <div class="grid-4 mb-16">
+        <div class="kpi-card red">
+          <div class="kpi-label">Spoilage Probability</div>
+          <div class="kpi-value" style="color:var(--red)">73<span style="font-size:16px">%</span></div>
+          <div class="kpi-sub"><span class="delta down">High Risk</span></div>
+          <div class="kpi-icon">🧬</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-label">Freshness at Arrival</div>
+          <div class="kpi-value">54<span style="font-size:16px">%</span></div>
+          <div class="kpi-sub"><span class="delta warn">Below target 75%</span></div>
+          <div class="kpi-icon">📉</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Quality Score (Predicted)</div>
+          <div class="kpi-value">C<span style="font-size:16px">+</span></div>
+          <div class="kpi-sub">Down from <b>B</b> forecast</div>
+          <div class="kpi-icon">⭐</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-label">Est. Financial Impact</div>
+          <div class="kpi-value">$14<span style="font-size:16px">k</span></div>
+          <div class="kpi-sub">If no action taken</div>
+          <div class="kpi-icon">💰</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+
+        <!-- Risk Score -->
+        <div class="card" style="display:flex;flex-direction:column">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🎯</span> Risk Score Breakdown</div>
+          </div>
+          <div class="card-body" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+            <div style="position:relative;width:140px;height:140px;margin:0 auto 16px">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="56" fill="none" stroke="#f0f1f5" stroke-width="12"/>
+                <!-- 73% risk arc -->
+                <circle cx="70" cy="70" r="56" fill="none" stroke="#ef4444" stroke-width="12"
+                  stroke-dasharray="256.6 351.9" stroke-linecap="round"
+                  transform="rotate(-90,70,70)"/>
+                <!-- amber zone -->
+                <circle cx="70" cy="70" r="56" fill="none" stroke="#f59e0b" stroke-width="12" opacity="0.3"
+                  stroke-dasharray="35.2 351.9" stroke-dashoffset="-256.6" stroke-linecap="round"
+                  transform="rotate(-90,70,70)"/>
+                <text x="70" y="64" text-anchor="middle" font-size="30" font-weight="700" fill="#ef4444" font-family="JetBrains Mono">73</text>
+                <text x="70" y="78" text-anchor="middle" font-size="12" fill="#8b91a8" font-family="DM Sans">% risk</text>
+                <text x="70" y="94" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600" font-family="DM Sans">HIGH</text>
+              </svg>
+            </div>
+            <div style="width:100%">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px">
+                <span style="color:var(--green)">0–30 Low</span>
+                <span style="color:var(--amber)">31–60 Med</span>
+                <span style="color:var(--red)">61–100 High</span>
+              </div>
+              <div style="height:8px;border-radius:4px;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);position:relative">
+                <div style="position:absolute;top:-3px;left:70%;width:14px;height:14px;border-radius:50%;background:#1a1d2e;border:2px solid #fff;transform:translateX(-50%)"></div>
+              </div>
+              <div style="font-size:10px;text-align:center;margin-top:4px;color:var(--text-3);font-family:var(--mono)">▲ 73%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Factor Analysis -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🤖</span> AI Factor Analysis</div>
+          </div>
+          <div class="card-body">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:10px">Key factors driving spoilage probability</div>
+            <div class="factor-row">
+              <div class="factor-name">Temperature Excursion (+4.2°C)</div>
+              <div class="factor-bar"><div class="factor-fill negative" style="width:85%"></div></div>
+              <div class="factor-impact" style="color:var(--red)">−34%</div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-name">Elevated Ethylene (42 ppm)</div>
+              <div class="factor-bar"><div class="factor-fill negative" style="width:70%"></div></div>
+              <div class="factor-impact" style="color:var(--red)">−22%</div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-name">Transit Duration (18 days)</div>
+              <div class="factor-bar"><div class="factor-fill neutral" style="width:55%"></div></div>
+              <div class="factor-impact" style="color:var(--amber)">−12%</div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-name">Humidity Level (87.3% RH)</div>
+              <div class="factor-bar"><div class="factor-fill positive" style="width:40%"></div></div>
+              <div class="factor-impact" style="color:var(--green)">+8%</div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-name">Pre-cooling Quality (Good)</div>
+              <div class="factor-bar"><div class="factor-fill positive" style="width:60%"></div></div>
+              <div class="factor-impact" style="color:var(--green)">+15%</div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-name">Historical Route Performance</div>
+              <div class="factor-bar"><div class="factor-fill neutral" style="width:30%"></div></div>
+              <div class="factor-impact" style="color:var(--amber)">−5%</div>
+            </div>
+            <div style="margin-top:12px;padding:10px;background:var(--purple-dim);border-radius:8px;font-size:11px;color:var(--text-2)">
+              <b style="color:var(--purple)">💡 AI Insight:</b> Temperature excursion is the primary driver. Immediate cooling adjustment could reduce risk score by ~28 points.
+            </div>
+          </div>
+        </div>
+
+        <!-- Degradation Timeline -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📉</span> Quality Degradation Forecast</div>
+          </div>
+          <div class="card-body">
+            <svg width="100%" height="200" viewBox="0 0 280 200">
+              <defs>
+                <linearGradient id="qualGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#22c55e" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0.05"/>
+                </linearGradient>
+                <linearGradient id="qualGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#6b4fbb" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#6b4fbb" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid -->
+              <line x1="30" y1="20" x2="270" y2="20" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <line x1="30" y1="55" x2="270" y2="55" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <line x1="30" y1="90" x2="270" y2="90" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <line x1="30" y1="125" x2="270" y2="125" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <line x1="30" y1="160" x2="270" y2="160" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="3,3"/>
+              <!-- Y labels -->
+              <text x="22" y="24" font-size="8" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">100</text>
+              <text x="22" y="59" font-size="8" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">80</text>
+              <text x="22" y="94" font-size="8" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">60</text>
+              <text x="22" y="129" font-size="8" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">40</text>
+              <text x="22" y="164" font-size="8" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">20</text>
+              <!-- Current trajectory (at risk, rapid decline) -->
+              <path d="M30,28 L70,35 L110,50 L150,72 L190,105 L230,140 L270,168" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+              <path d="M30,28 L70,35 L110,50 L150,72 L190,105 L230,140 L270,168 L270,160 L230,128 L190,95 L150,62 L110,42 L70,28 L30,28 Z" fill="url(#qualGrad)"/>
+              <!-- Optimal trajectory (dashed) -->
+              <path d="M30,28 L70,30 L110,36 L150,45 L190,58 L230,75 L270,96" fill="none" stroke="#6b4fbb" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4,3"/>
+              <path d="M30,28 L70,30 L110,36 L150,45 L190,58 L230,75 L270,96 L270,90 L230,68 L190,52 L150,38 L110,30 L70,24 L30,22 Z" fill="url(#qualGrad2)"/>
+              <!-- ETA line -->
+              <line x1="270" y1="20" x2="270" y2="170" stroke="#1a1d2e" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="265" y="18" text-anchor="end" font-size="8" fill="#1a1d2e" font-weight="600" font-family="JetBrains Mono">ETA</text>
+              <!-- Now marker -->
+              <line x1="110" y1="20" x2="110" y2="170" stroke="#6b4fbb" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+              <text x="115" y="18" font-size="8" fill="#6b4fbb" font-weight="600" font-family="JetBrains Mono">NOW</text>
+              <!-- Min threshold -->
+              <line x1="30" y1="90" x2="270" y2="90" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+              <text x="33" y="87" font-size="8" fill="#d97706" font-weight="600" font-family="JetBrains Mono">MIN 60</text>
+              <!-- X labels -->
+              <text x="30" y="178" font-size="8" fill="#8b91a8" text-anchor="middle" font-family="JetBrains Mono">D0</text>
+              <text x="110" y="178" font-size="8" fill="#8b91a8" text-anchor="middle" font-family="JetBrains Mono">D7</text>
+              <text x="190" y="178" font-size="8" fill="#8b91a8" text-anchor="middle" font-family="JetBrains Mono">D14</text>
+              <text x="270" y="178" font-size="8" fill="#8b91a8" text-anchor="middle" font-family="JetBrains Mono">D18</text>
+              <!-- Legend -->
+              <line x1="30" y1="192" x2="50" y2="192" stroke="#ef4444" stroke-width="2"/>
+              <text x="54" y="195" font-size="8" fill="#4b5068" font-family="DM Sans">Current path</text>
+              <line x1="120" y1="192" x2="140" y2="192" stroke="#6b4fbb" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <text x="144" y="195" font-size="8" fill="#4b5068" font-family="DM Sans">If action taken</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Environmental time series -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📊</span> Environmental Conditions — Full Transit History</div>
+          <div style="display:flex;gap:12px">
+            <span class="tag badge-risk">🌡 Temp</span>
+            <span class="tag badge-purple">💧 Humidity</span>
+            <span class="tag" style="background:var(--teal-dim);color:#0d9488">🌿 Ethylene</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <svg width="100%" height="120" viewBox="0 0 900 120">
+            <defs>
+              <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Grid lines -->
+            <line x1="0" y1="30" x2="900" y2="30" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="4,4"/>
+            <line x1="0" y1="60" x2="900" y2="60" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="4,4"/>
+            <line x1="0" y1="90" x2="900" y2="90" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="4,4"/>
+            <!-- Temperature line (normalized) -->
+            <path d="M0,70 L50,68 L100,65 L150,60 L200,58 L250,55 L300,50 L350,45 L380,48 L410,52 L450,58 L500,62 L550,55 L600,50 L650,45 L700,40 L750,38 L800,35 L850,32 L900,30" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+            <path d="M0,70 L50,68 L100,65 L150,60 L200,58 L250,55 L300,50 L350,45 L380,48 L410,52 L450,58 L500,62 L550,55 L600,50 L650,45 L700,40 L750,38 L800,35 L850,32 L900,30 L900,90 L0,90 Z" fill="url(#tempFill)"/>
+            <!-- Humidity line (dashed purple) -->
+            <path d="M0,55 L100,52 L200,50 L300,48 L400,52 L500,55 L600,52 L700,48 L800,50 L900,52" fill="none" stroke="#6b4fbb" stroke-width="1.5" stroke-dasharray="5,3" stroke-linecap="round" opacity="0.7"/>
+            <!-- Ethylene line (teal) -->
+            <path d="M0,75 L100,73 L200,70 L300,65 L400,55 L500,48 L600,42 L700,38 L800,32 L900,28" fill="none" stroke="#00b8a9" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+            <!-- Excursion highlight -->
+            <rect x="650" y="0" width="250" height="110" fill="rgba(239,68,68,0.04)" rx="2"/>
+            <line x1="650" y1="0" x2="650" y2="110" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+            <text x="660" y="12" font-size="9" fill="#ef4444" font-family="DM Sans" font-weight="600">⚠ Temp excursion zone</text>
+            <!-- Day markers -->
+            <line x1="0" y1="0" x2="0" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <line x1="150" y1="0" x2="150" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <line x1="300" y1="0" x2="300" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <line x1="450" y1="0" x2="450" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <line x1="600" y1="0" x2="600" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <line x1="750" y1="0" x2="750" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <line x1="900" y1="0" x2="900" y2="110" stroke="#e4e6ef" stroke-width="0.5"/>
+            <text x="4" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">Day 1</text>
+            <text x="154" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">Day 4</text>
+            <text x="304" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">Day 7 ←NOW</text>
+            <text x="454" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">Day 10</text>
+            <text x="604" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">Day 13</text>
+            <text x="754" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">Day 16</text>
+            <text x="880" y="116" font-size="8" fill="#8b91a8" font-family="JetBrains Mono">ETA</text>
+          </svg>
+        </div>
+      </div>
+
+    </div><!-- /screen-2 -->
+
+    <!-- ====================== SCREEN 4: LOGISTICS DECISIONS ====================== -->
+    <div class="screen" id="screen-3">
+
+      <div class="grid-map">
+        <!-- Main recommendations -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div>
+              <div style="font-size:16px;font-weight:700;color:var(--text)">🤖 AI Operational Recommendations</div>
+              <div style="font-size:12px;color:var(--text-3);margin-top:2px">Generated for SHP-04821 · Updated 3 min ago · Model: FreshGuard-v2.1</div>
+            </div>
+            <button class="btn-primary">Execute All Priority Actions</button>
+          </div>
+
+          <!-- Priority recommendations -->
+          <div class="section-title">🔴 Priority Actions (Immediate)</div>
+          
+          <div class="recommendation-card priority">
+            <div class="rec-icon-wrap red">🌡️</div>
+            <div style="flex:1">
+              <div class="rec-title">Reduce Container Temperature to 9°C</div>
+              <div class="rec-desc">Current temperature 13.4°C is 4.2°C above optimal threshold. Immediate cooling adjustment required to slow ripening and reduce spoilage probability from 73% → 45%.</div>
+              <div class="rec-meta">
+                <span class="tag badge-risk">HIGH PRIORITY</span>
+                <span class="tag" style="background:#fef3c7;color:#92400e">⏰ Act within 2h</span>
+                <span class="tag" style="background:#f0fdf4;color:#166534">↓28% risk reduction</span>
+              </div>
+              <div class="rec-actions">
+                <button class="btn-primary" style="background:var(--red)">🔧 Send Control Command</button>
+                <button class="btn-ghost">📋 View Container Details</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="recommendation-card priority">
+            <div class="rec-icon-wrap red">🚢</div>
+            <div style="flex:1">
+              <div class="rec-title">Expedite Routing via Suez Priority Lane</div>
+              <div class="rec-desc">Switch SHP-04821 to priority vessel track to reduce transit by 1.8 days. Predicted shelf life on arrival improves from 4.2 → 6.0 days, meeting distribution minimum.</div>
+              <div class="rec-meta">
+                <span class="tag badge-risk">HIGH PRIORITY</span>
+                <span class="tag" style="background:#eff6ff;color:#1e40af">📅 Save 1.8 days</span>
+                <span class="tag" style="background:#fef3c7;color:#92400e">💰 +$2,400 routing cost</span>
+              </div>
+              <div class="rec-actions">
+                <button class="btn-primary" style="background:var(--red)">📡 Reroute Request</button>
+                <button class="btn-ghost">📊 Cost-Benefit Analysis</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top:16px">🟡 Secondary Actions (Within 24h)</div>
+
+          <div class="recommendation-card secondary">
+            <div class="rec-icon-wrap amber">🏭</div>
+            <div style="flex:1">
+              <div class="rec-title">Pre-Alert Rotterdam Distribution Center</div>
+              <div class="rec-desc">Notify RTM-DC3 to prepare expedited unloading team. Reduce docking-to-cold-store time from standard 4h → 1.5h. Pre-stage refrigerated transport to Priority Retail.</div>
+              <div class="rec-meta">
+                <span class="tag badge-warning">SECONDARY</span>
+                <span class="tag" style="background:#f0fdf4;color:#166534">↓2.5h at-dock time</span>
+              </div>
+              <div class="rec-actions">
+                <button class="btn-primary">📨 Send Pre-Alert</button>
+                <button class="btn-ghost">🗓️ Schedule</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="recommendation-card secondary">
+            <div class="rec-icon-wrap amber">🌿</div>
+            <div style="flex:1">
+              <div class="rec-title">Activate Ethylene Scrubber (Zone B)</div>
+              <div class="rec-desc">Elevated ethylene at 42 ppm detected in Zone B pallets. Activate onboard scrubber system to reduce levels below 25 ppm and decelerate ripening in affected zone.</div>
+              <div class="rec-meta">
+                <span class="tag badge-warning">SECONDARY</span>
+                <span class="tag" style="background:#e0f7f5;color:#0d9488">🌿 Zone B only</span>
+              </div>
+              <div class="rec-actions">
+                <button class="btn-primary">▶ Activate Scrubber</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top:16px">🟢 Routine Optimizations</div>
+
+          <div class="recommendation-card routine">
+            <div class="rec-icon-wrap teal">📦</div>
+            <div style="flex:1">
+              <div class="rec-title">Prioritize Unloading Order: Zone B First</div>
+              <div class="rec-desc">Zone B pallets (B1, B2) show advanced ripening. Unload and route to high-velocity retail channels (METRO, REWE) first. Zones A1–A3 can follow standard processing.</div>
+              <div class="rec-meta">
+                <span class="tag badge-normal">ROUTINE</span>
+                <span class="tag" style="background:#eff6ff;color:#1e40af">📦 Pallets B1, B2</span>
+              </div>
+              <div class="rec-actions">
+                <button class="btn-primary" style="background:var(--teal)">📋 Create Unloading Plan</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="recommendation-card routine">
+            <div class="rec-icon-wrap purple">🗺️</div>
+            <div style="flex:1">
+              <div class="rec-title">Redirect 30% Volume to Amsterdam DC</div>
+              <div class="rec-desc">AI predicts Rotterdam DC at 94% capacity on arrival date. Divert 5.5 MT to AMS-DC2 to prevent staging delays and ensure cold-chain integrity.</div>
+              <div class="rec-meta">
+                <span class="tag badge-normal">ROUTINE</span>
+                <span class="tag badge-purple">5.5 MT diversion</span>
+              </div>
+              <div class="rec-actions">
+                <button class="btn-primary" style="background:var(--purple)">🔀 Adjust Allocation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel: Decision log + impact -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <!-- Impact summary -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📊</span> Projected Impact</div>
+            </div>
+            <div class="card-body">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:12px">If all recommendations executed:</div>
+              <div style="margin-bottom:12px">
+                <div class="flex-between" style="margin-bottom:4px">
+                  <span style="font-size:12px;color:var(--text-2)">Spoilage Risk</span>
+                  <span style="font-size:12px;font-family:var(--mono)">73% → <b style="color:var(--green)">31%</b></span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:31%;background:var(--green)"></div></div>
+              </div>
+              <div style="margin-bottom:12px">
+                <div class="flex-between" style="margin-bottom:4px">
+                  <span style="font-size:12px;color:var(--text-2)">Shelf Life on Arrival</span>
+                  <span style="font-size:12px;font-family:var(--mono)">4.2 → <b style="color:var(--green)">6.8d</b></span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:68%;background:var(--green)"></div></div>
+              </div>
+              <div style="margin-bottom:12px">
+                <div class="flex-between" style="margin-bottom:4px">
+                  <span style="font-size:12px;color:var(--text-2)">Financial Loss Prevented</span>
+                  <span style="font-size:12px;font-family:var(--mono);color:var(--green)"><b>$11,200</b></span>
+                </div>
+              </div>
+              <div style="padding:10px;background:var(--green-dim);border-radius:8px;font-size:12px;color:#166534;font-weight:500">
+                ✅ Net ROI on interventions: <b>+$8,800</b>
+              </div>
+            </div>
+          </div>
+
+          <!-- Decision timeline -->
+          <div class="card" style="flex:1">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📋</span> Decision Log</div>
+            </div>
+            <div class="card-body" style="padding:12px 16px">
+              <div class="timeline-item">
+                <div class="timeline-dot red">🚨</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Temp Excursion Detected</div>
+                  <div class="timeline-sub">AI flagged +4.2°C deviation</div>
+                  <div class="timeline-time">09:12 UTC · Auto</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot amber">🤖</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">AI Analysis Triggered</div>
+                  <div class="timeline-sub">Risk model updated, 5 recs generated</div>
+                  <div class="timeline-time">09:14 UTC · Auto</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot purple">👤</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Operator Alerted (J. Lim)</div>
+                  <div class="timeline-sub">Push + email notification sent</div>
+                  <div class="timeline-time">09:15 UTC · Auto</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot green">✅</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Awaiting Operator Decision</div>
+                  <div class="timeline-sub">3 priority actions pending approval</div>
+                  <div class="timeline-time">Now</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /screen-3 -->
+
+    <!-- ====================== SCREEN 5: DISTRIBUTION ====================== -->
+    <div class="screen" id="screen-4">
+
+      <div class="grid-4 mb-16">
+        <div class="kpi-card purple">
+          <div class="kpi-label">Shipments to Allocate</div>
+          <div class="kpi-value">14</div>
+          <div class="kpi-sub">Arriving in next 72h</div>
+          <div class="kpi-icon">📦</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-label">Distribution Centers</div>
+          <div class="kpi-value">9</div>
+          <div class="kpi-sub">Across 6 countries</div>
+          <div class="kpi-icon">🏭</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Optimal Matches Found</div>
+          <div class="kpi-value">11</div>
+          <div class="kpi-sub"><span class="delta up">3 pending</span></div>
+          <div class="kpi-icon">✅</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-label">Total Volume to Route</div>
+          <div class="kpi-value">284<span style="font-size:16px">MT</span></div>
+          <div class="kpi-sub">Across all incoming lots</div>
+          <div class="kpi-icon">⚖️</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px">
+
+        <!-- Left: Heatmap + allocation -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- Demand Heatmap -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🌍</span> Regional Demand Heatmap — Europe</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span style="font-size:10px;color:var(--text-3)">Low</span>
+                <svg width="80" height="10"><defs><linearGradient id="heatLegend" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#bfdbfe"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#ef4444"/></linearGradient></defs><rect width="80" height="10" rx="3" fill="url(#heatLegend)"/></svg>
+                <span style="font-size:10px;color:var(--text-3)">High</span>
+              </div>
+            </div>
+            <div class="card-body" style="padding:0">
+              <div class="demand-map">
+                <svg viewBox="0 0 600 280" width="100%" style="display:block">
+                  <defs>
+                    <radialGradient id="h1" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.35"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <radialGradient id="h2" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <radialGradient id="h3" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.2"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <radialGradient id="h4" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.28"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <radialGradient id="h5" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.25"/>
+                      <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                  </defs>
+                  
+                  <!-- Europe simplified -->
+                  <path d="M100,40 L280,30 L340,50 L360,90 L340,130 L280,140 L240,160 L200,180 L160,170 L120,150 L90,120 L80,80 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="1"/>
+                  <!-- Scandinavia -->
+                  <path d="M240,20 L280,15 L290,30 L280,35 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="0.5"/>
+                  <path d="M270,15 L295,10 L310,30 L300,40 L285,35 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="0.5"/>
+                  <!-- UK -->
+                  <path d="M120,50 L150,42 L160,55 L145,70 L125,68 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="0.5"/>
+                  <!-- Iberian -->
+                  <path d="M100,130 L145,125 L155,150 L140,175 L105,170 L88,145 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="0.5"/>
+                  <!-- Italy -->
+                  <path d="M245,130 L265,125 L275,155 L265,185 L255,195 L248,170 L240,155 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="0.5"/>
+                  <!-- Eastern -->
+                  <path d="M330,50 L420,45 L440,70 L430,110 L380,120 L350,105 L340,80 Z" fill="#d4ddf5" stroke="#c4d0ee" stroke-width="0.5"/>
+                  
+                  <!-- Heat blobs -->
+                  <ellipse cx="185" cy="75" rx="80" ry="65" fill="url(#h1)"/>
+                  <ellipse cx="130" cy="55" rx="50" ry="40" fill="url(#h5)"/>
+                  <ellipse cx="115" cy="145" rx="55" ry="45" fill="url(#h2)"/>
+                  <ellipse cx="300" cy="70" rx="60" ry="50" fill="url(#h4)"/>
+                  <ellipse cx="250" cy="140" rx="50" ry="40" fill="url(#h3)"/>
+                  
+                  <!-- City markers -->
+                  <circle cx="185" cy="75" r="6" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>
+                  <text x="195" y="72" font-size="9" fill="#1a1d2e" font-weight="600" font-family="DM Sans">Rotterdam</text>
+                  <text x="195" y="82" font-size="8" fill="#8b91a8" font-family="DM Sans">HIGH DEMAND</text>
+                  
+                  <circle cx="135" cy="58" r="5" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>
+                  <text x="118" y="48" font-size="9" fill="#1a1d2e" font-weight="600" font-family="DM Sans">London</text>
+                  
+                  <circle cx="295" cy="72" r="5" fill="#f59e0b" stroke="#fff" stroke-width="1.5"/>
+                  <text x="305" y="69" font-size="9" fill="#1a1d2e" font-weight="600" font-family="DM Sans">Berlin</text>
+                  
+                  <circle cx="205" cy="105" r="4" fill="#f59e0b" stroke="#fff" stroke-width="1.5"/>
+                  <text x="215" y="102" font-size="9" fill="#1a1d2e" font-weight="600" font-family="DM Sans">Paris</text>
+                  
+                  <circle cx="115" cy="148" r="4" fill="#f59e0b" stroke="#fff" stroke-width="1.5"/>
+                  <text x="125" y="145" font-size="9" fill="#1a1d2e" font-weight="600" font-family="DM Sans">Madrid</text>
+                  
+                  <circle cx="252" cy="138" r="4" fill="#22c55e" stroke="#fff" stroke-width="1.5"/>
+                  <text x="262" y="135" font-size="9" fill="#1a1d2e" font-weight="600" font-family="DM Sans">Milan</text>
+                  
+                  <!-- DC markers -->
+                  <rect x="178" y="68" width="14" height="14" rx="3" fill="#6b4fbb"/>
+                  <text x="185" y="78" text-anchor="middle" font-size="8" fill="white">DC</text>
+                  
+                  <rect x="128" y="52" width="14" height="14" rx="3" fill="#6b4fbb"/>
+                  <text x="135" y="62" text-anchor="middle" font-size="8" fill="white">DC</text>
+                  
+                  <rect x="288" y="66" width="14" height="14" rx="3" fill="#00b8a9"/>
+                  <text x="295" y="76" text-anchor="middle" font-size="8" fill="white">DC</text>
+                  
+                  <!-- Routing arrows -->
+                  <path d="M185,165 Q175,120 185,82" stroke="#6b4fbb" stroke-width="1.5" fill="none" stroke-dasharray="3,2" marker-end="url(#arrowBlue)" opacity="0.6"/>
+                  
+                  <!-- Legend at bottom -->
+                  <rect x="10" y="255" width="280" height="20" rx="4" fill="rgba(255,255,255,0.8)"/>
+                  <rect x="18" y="260" width="10" height="10" rx="2" fill="#6b4fbb"/>
+                  <text x="32" y="269" font-size="8" fill="#4b5068" font-family="DM Sans">Distribution Center</text>
+                  <circle cx="108" cy="265" r="4" fill="#ef4444"/>
+                  <text x="116" y="269" font-size="8" fill="#4b5068" font-family="DM Sans">High Demand</text>
+                  <circle cx="166" cy="265" r="4" fill="#f59e0b"/>
+                  <text x="174" y="269" font-size="8" fill="#4b5068" font-family="DM Sans">Medium</text>
+                  <circle cx="210" cy="265" r="4" fill="#22c55e"/>
+                  <text x="218" y="269" font-size="8" fill="#4b5068" font-family="DM Sans">Low</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Allocation routing table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📋</span> AI Routing Decisions</div>
+              <button class="btn-primary" style="font-size:11px;padding:5px 10px">Confirm All</button>
+            </div>
+            <div class="card-body" style="padding:12px 16px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px 80px;gap:6px;margin-bottom:8px">
+                <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em">Shipment</div>
+                <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em">→ DC Allocation</div>
+                <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em">Volume</div>
+                <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em">Shelf Life</div>
+                <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em">Status</div>
+              </div>
+              <div style="border-top:1px solid var(--border-light)">
+                <!-- Row: SHP-04821 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px 80px;gap:6px;padding:8px 0;border-bottom:1px solid var(--border-light);align-items:center">
+                  <div style="font-size:11px;font-weight:600;font-family:var(--mono);color:var(--purple)">SHP-04821</div>
+                  <div style="font-size:11px;color:var(--text-2)">RTM-DC3 (70%) · AMS-DC2 (30%)</div>
+                  <div style="font-size:11px;font-family:var(--mono)">18.4 MT</div>
+                  <div class="alloc-shelf warn" style="font-size:11px">4.2d</div>
+                  <span class="ship-badge badge-risk">Urgent</span>
+                </div>
+                <!-- Row: SHP-03917 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px 80px;gap:6px;padding:8px 0;border-bottom:1px solid var(--border-light);align-items:center">
+                  <div style="font-size:11px;font-weight:600;font-family:var(--mono);color:var(--purple)">SHP-03917</div>
+                  <div style="font-size:11px;color:var(--text-2)">HAM-DC1 (100%)</div>
+                  <div style="font-size:11px;font-family:var(--mono)">22.1 MT</div>
+                  <div class="alloc-shelf good" style="font-size:11px">6.8d</div>
+                  <span class="ship-badge badge-normal">AI Set</span>
+                </div>
+                <!-- Row: SHP-05102 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px 80px;gap:6px;padding:8px 0;border-bottom:1px solid var(--border-light);align-items:center">
+                  <div style="font-size:11px;font-weight:600;font-family:var(--mono);color:var(--purple)">SHP-05102</div>
+                  <div style="font-size:11px;color:var(--text-2)">AMS-DC2 (60%) · BRU-DC1 (40%)</div>
+                  <div style="font-size:11px;font-family:var(--mono)">15.6 MT</div>
+                  <div class="alloc-shelf good" style="font-size:11px">9.1d</div>
+                  <span class="ship-badge badge-normal">AI Set</span>
+                </div>
+                <!-- Row: SHP-02744 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px 80px;gap:6px;padding:8px 0;border-bottom:1px solid var(--border-light);align-items:center">
+                  <div style="font-size:11px;font-weight:600;font-family:var(--mono);color:var(--purple)">SHP-02744</div>
+                  <div style="font-size:11px;color:var(--text-2)">RTM-DC3 (50%) · PAR-DC2 (50%)</div>
+                  <div style="font-size:11px;font-family:var(--mono)">19.2 MT</div>
+                  <div class="alloc-shelf warn" style="font-size:11px">3.1d</div>
+                  <span class="ship-badge badge-warning">Review</span>
+                </div>
+                <!-- Row: SHP-06211 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px 80px;gap:6px;padding:8px 0;align-items:center">
+                  <div style="font-size:11px;font-weight:600;font-family:var(--mono);color:var(--purple)">SHP-06211</div>
+                  <div style="font-size:11px;color:var(--text-2)">MAD-DC1 (100%)</div>
+                  <div style="font-size:11px;font-family:var(--mono)">24.8 MT</div>
+                  <div class="alloc-shelf good" style="font-size:11px">11.2d</div>
+                  <span class="ship-badge badge-normal">AI Set</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: DC recommendations + market suggestions -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- DC Capacity -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🏭</span> DC Capacity Status</div>
+            </div>
+            <div class="card-body">
+              <div class="alloc-row">
+                <div class="alloc-rank">1</div>
+                <div style="flex:1">
+                  <div class="alloc-name">RTM-DC3 · Rotterdam</div>
+                  <div class="alloc-sub">Priority: SHP-04821, SHP-02744</div>
+                </div>
+                <div style="width:80px">
+                  <div class="flex-between" style="margin-bottom:3px"><span style="font-size:10px;color:var(--text-3)">Cap</span><span style="font-size:10px;font-family:var(--mono)">88%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:88%;background:var(--amber)"></div></div>
+                </div>
+              </div>
+              <div class="alloc-row">
+                <div class="alloc-rank">2</div>
+                <div style="flex:1">
+                  <div class="alloc-name">AMS-DC2 · Amsterdam</div>
+                  <div class="alloc-sub">Overflow from RTM</div>
+                </div>
+                <div style="width:80px">
+                  <div class="flex-between" style="margin-bottom:3px"><span style="font-size:10px;color:var(--text-3)">Cap</span><span style="font-size:10px;font-family:var(--mono)">54%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:54%;background:var(--green)"></div></div>
+                </div>
+              </div>
+              <div class="alloc-row">
+                <div class="alloc-rank">3</div>
+                <div style="flex:1">
+                  <div class="alloc-name">HAM-DC1 · Hamburg</div>
+                  <div class="alloc-sub">SHP-03917 assigned</div>
+                </div>
+                <div style="width:80px">
+                  <div class="flex-between" style="margin-bottom:3px"><span style="font-size:10px;color:var(--text-3)">Cap</span><span style="font-size:10px;font-family:var(--mono)">41%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:41%;background:var(--green)"></div></div>
+                </div>
+              </div>
+              <div class="alloc-row">
+                <div class="alloc-rank">4</div>
+                <div style="flex:1">
+                  <div class="alloc-name">PAR-DC2 · Paris</div>
+                  <div class="alloc-sub">Available capacity</div>
+                </div>
+                <div style="width:80px">
+                  <div class="flex-between" style="margin-bottom:3px"><span style="font-size:10px;color:var(--text-3)">Cap</span><span style="font-size:10px;font-family:var(--mono)">32%</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:32%;background:var(--green)"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- High-turnover markets -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🛒</span> High-Turnover Market Suggestions</div>
+            </div>
+            <div class="card-body">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:10px">AI-recommended retail channels for at-risk lots (SHP-04821):</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="padding:10px 12px;background:var(--red-dim);border:1px solid #fecaca;border-radius:8px">
+                  <div style="font-size:12px;font-weight:600;color:#dc2626;margin-bottom:2px">🚨 REWE Group (DE) — 8 stores</div>
+                  <div style="font-size:11px;color:#dc2626">High-velocity format · Banana avg turnover: 1.2 days</div>
+                </div>
+                <div style="padding:10px 12px;background:var(--amber-dim);border:1px solid #fde68a;border-radius:8px">
+                  <div style="font-size:12px;font-weight:600;color:#d97706;margin-bottom:2px">⚡ Albert Heijn (NL) — 12 stores</div>
+                  <div style="font-size:11px;color:#d97706">Promotion slot available this week · Turnover: 1.5 days</div>
+                </div>
+                <div style="padding:10px 12px;background:var(--amber-dim);border:1px solid #fde68a;border-radius:8px">
+                  <div style="font-size:12px;font-weight:600;color:#d97706;margin-bottom:2px">⚡ Carrefour (FR) — 6 stores</div>
+                  <div style="font-size:11px;color:#d97706">Weekend promotion match · Turnover: 1.8 days</div>
+                </div>
+                <div style="padding:10px 12px;background:var(--green-dim);border:1px solid #86efac;border-radius:8px">
+                  <div style="font-size:12px;font-weight:600;color:#16a34a;margin-bottom:2px">✅ METRO Wholesale (DE) — 3 stores</div>
+                  <div style="font-size:11px;color:#16a34a">Bulk buyer · Can absorb 4.2 MT · Turnover: same day</div>
+                </div>
+              </div>
+              <div style="margin-top:12px;text-align:right">
+                <button class="btn-primary">📩 Send Retail Pre-Alerts</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shelf life vs route fit -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📊</span> Shelf Life vs Route Distance</div>
+            </div>
+            <div class="card-body">
+              <svg width="100%" height="110" viewBox="0 0 240 110">
+                <!-- Axes -->
+                <line x1="30" y1="10" x2="30" y2="90" stroke="#e4e6ef" stroke-width="1"/>
+                <line x1="30" y1="90" x2="230" y2="90" stroke="#e4e6ef" stroke-width="1"/>
+                <!-- Grid -->
+                <line x1="30" y1="30" x2="230" y2="30" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <line x1="30" y1="60" x2="230" y2="60" stroke="#e4e6ef" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <!-- Labels -->
+                <text x="22" y="14" font-size="7" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">12d</text>
+                <text x="22" y="44" font-size="7" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">8d</text>
+                <text x="22" y="74" font-size="7" fill="#8b91a8" text-anchor="end" font-family="JetBrains Mono">4d</text>
+                <!-- Min threshold line -->
+                <line x1="30" y1="60" x2="230" y2="60" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.8"/>
+                <text x="180" y="56" font-size="7" fill="#d97706" font-weight="600" font-family="DM Sans">Min 6d</text>
+                <!-- Scatter points -->
+                <!-- (x=distance, y=shelf life) -->
+                <circle cx="60" cy="20" r="5" fill="#22c55e" opacity="0.8"/><text x="66" y="18" font-size="7" fill="#4b5068" font-family="DM Sans">HAM</text>
+                <circle cx="80" cy="35" r="5" fill="#22c55e" opacity="0.8"/><text x="86" y="33" font-size="7" fill="#4b5068" font-family="DM Sans">AMS</text>
+                <circle cx="110" cy="40" r="5" fill="#22c55e" opacity="0.8"/><text x="116" y="38" font-size="7" fill="#4b5068" font-family="DM Sans">RTM</text>
+                <circle cx="150" cy="55" r="5" fill="#f59e0b" opacity="0.8"/><text x="156" y="53" font-size="7" fill="#4b5068" font-family="DM Sans">PAR</text>
+                <circle cx="170" cy="65" r="5" fill="#ef4444" opacity="0.8"/><text x="176" y="63" font-size="7" fill="#4b5068" font-family="DM Sans">MAD</text>
+                <!-- SHP-04821 highlighted -->
+                <circle cx="110" cy="80" r="7" fill="#ef4444" stroke="#fff" stroke-width="1.5" opacity="0.9"/>
+                <text x="120" y="82" font-size="7" fill="#ef4444" font-weight="600" font-family="DM Sans">04821 ⚠</text>
+                <!-- Trend line -->
+                <line x1="45" y1="15" x2="200" y2="75" stroke="#6b4fbb" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+                <!-- Axis labels -->
+                <text x="130" y="104" font-size="7" fill="#8b91a8" text-anchor="middle" font-family="DM Sans">Distance from port →</text>
+                <text x="12" y="55" font-size="7" fill="#8b91a8" text-anchor="middle" font-family="DM Sans" transform="rotate(-90,12,55)">Shelf Life</text>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /screen-4 -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2,'0');
+  const m = String(now.getUTCMinutes()).padStart(2,'0');
+  const s = String(now.getUTCSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s} UTC`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Screen navigation
+const breadcrumbs = [
+  'Global Shipment Control Dashboard',
+  'Digital Twin — Container SHP-04821',
+  'AI Prediction & Risk Analysis',
+  'Logistics Optimization & Decisions',
+  'Regional Distribution Allocation'
+];
+
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach((s,i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.nav-item[data-screen]').forEach(item => {
+    item.classList.toggle('active', parseInt(item.dataset.screen) === n);
+  });
+  document.getElementById('breadcrumb').textContent = breadcrumbs[n];
+}
+
+// Simulate live sensor updates
+function simulateLive() {
+  const tempEl = document.querySelector('.sensor-value');
+  if (tempEl) {
+    const base = 13.4;
+    const variation = (Math.random() - 0.5) * 0.4;
+    tempEl.textContent = (base + variation).toFixed(1);
+  }
+}
+setInterval(simulateLive, 4000);
+
+// Animate progress bars on load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.progress-fill').forEach(el => {
+      const width = el.style.width;
+      el.style.width = '0%';
+      setTimeout(() => { el.style.width = width; }, 100);
+    });
+  }, 200);
+});
+</script>
+</body>
+</html>
